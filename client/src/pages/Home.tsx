@@ -609,59 +609,56 @@ function CatalogHero({
               </button>
             </div> */}
 
-            <div className="flex flex-col gap-6 md:min-h-[420px] md:flex-row md:items-end md:justify-between">
-              <div className="w-full max-w-[680px]">
-                {/* <form onSubmit={submitSearch} className="flex overflow-hidden rounded-[18px] border border-white/80 bg-white shadow-lg shadow-slate-900/20">
-                  <button
-                    type="button"
-                    onClick={() => setSearchOpen(true)}
-                    className="flex h-[58px] w-[58px] items-center justify-center bg-[#f59e0b] text-white"
-                    aria-label="بحث سريع"
-                  >
-                    <Search className="h-5 w-5" />
-                  </button>
-                  <input
-                    ref={searchInputRef}
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    onFocus={() => setSearchOpen(true)}
-                    placeholder="ما الذي تبحث عنه؟"
-                    className="h-[58px] flex-1 bg-transparent px-4 text-right text-sm text-slate-800 outline-none placeholder:text-slate-500"
-                    style={{ fontFamily: "'Cairo', sans-serif" }}
-                  />
-                  <button
-                    type="submit"
-                    className="h-[58px] bg-[#f97316] px-6 text-sm font-bold text-white"
-                    style={{ fontFamily: "'Cairo', sans-serif" }}
-                  >
-                    بحث
-                  </button>
-                </form> */}
-              </div>
-
-              <div className="max-w-[500px] text-right text-white md:pb-2">
-                <p className="mb-3 text-sm font-medium text-[#fbbf24]" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  {heroBrand}
+            <div dir="rtl" className="grid w-full gap-6 md:min-h-[420px] md:grid-cols-2 md:items-end">
+              <div className="rounded-[24px] border border-white/15 bg-slate-950/25 p-5 text-right backdrop-blur-sm md:p-6">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <span className="text-xs font-semibold text-slate-300" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    العلامة التجارية
+                  </span>
+                  <span className="rounded-full bg-[#fbbf24]/15 px-3 py-1 text-sm font-bold text-[#fbbf24]" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    {heroBrand}
+                  </span>
+                </div>
+                <p className="mb-2 text-xs font-semibold text-slate-300" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  الفئة
                 </p>
-                <h1 className="text-3xl font-black leading-tight md:text-5xl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <h1 className="text-3xl font-black leading-tight text-white md:text-4xl" style={{ fontFamily: "'Cairo', sans-serif" }}>
                   {heroCategory}
                 </h1>
-                <p className="mt-4 max-w-[440px] text-sm leading-7 text-slate-200 md:text-base" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                <p className="mt-4 text-xs font-semibold text-slate-300" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  اسم المنتج
+                </p>
+                <h2 className="mt-1 text-xl font-bold leading-relaxed text-[#dbeafe]" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  {featuredProduct?.name || "منتج مميز"}
+                </h2>
+                <p className="mt-4 text-xs font-semibold text-slate-300" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  الوصف
+                </p>
+                <p className="mt-1 max-w-[440px] text-sm leading-7 text-slate-200 md:text-base" style={{ fontFamily: "'Tajawal', sans-serif" }}>
                   {heroDescription}
                 </p>
-                <p className="mt-4 text-xl font-black text-[#fbbf24]" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  السعر: {heroPrice}
-                </p>
-                <div className="mt-6 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                    className="rounded-[18px] bg-[#111827] px-8 py-3 text-lg font-black text-white shadow-lg shadow-slate-900/30"
-                    style={{ fontFamily: "'Cairo', sans-serif" }}
-                  >
-                    تسوق الآن
-                  </button>
+                <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/15 pt-4">
+                  <span className="text-xs font-semibold text-slate-300" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    السعر
+                  </span>
+                  <span className="text-xl font-black text-[#fbbf24]" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    {heroPrice}
+                  </span>
                 </div>
+              </div>
+
+              <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[24px] border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm md:min-h-[280px]">
+                <p className="max-w-[420px] text-base font-semibold leading-8 text-white md:text-lg" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                  اكتشف أحدث المنتجات والبرندات والفئات المتوفرة في متجرنا مع عروض حصرية ومواصفات قوية.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  className="mt-7 rounded-[18px] bg-[#f97316] px-8 py-3 text-lg font-black text-white shadow-lg shadow-orange-950/30 transition hover:bg-[#ea580c]"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
+                  تسوق الآن
+                </button>
               </div>
             </div>
           </div>
