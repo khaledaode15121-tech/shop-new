@@ -1942,41 +1942,56 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="productIsRentable">
-                  هل المنتج قابل للإيجار؟
+            <div className="rounded-xl border-2 border-emerald-100 bg-emerald-50/60 p-4">
+              <div className="mb-3">
+                <Label className="text-base font-bold text-emerald-900">
+                  إعدادات الإيجار
                 </Label>
-                <select
-                  id="productIsRentable"
-                  value={productFormData.isRentable ? "yes" : "no"}
-                  onChange={e => {
-                    const isRentable = e.target.value === "yes";
-                    handleProductFormChange("isRentable", isRentable);
-                    if (!isRentable) handleProductFormChange("rentalPrice", "");
-                  }}
-                  className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="no">لا</option>
-                  <option value="yes">نعم</option>
-                </select>
+                <p className="mt-1 text-xs text-emerald-700">
+                  اختر نعم لإظهار المنتج ضمن فلتر المنتجات القابلة للإيجار في
+                  المتجر.
+                </p>
               </div>
-              {productFormData.isRentable && (
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label htmlFor="productRentalPrice">سعر الإيجار (ر.س)</Label>
-                  <Input
-                    id="productRentalPrice"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={productFormData.rentalPrice}
-                    onChange={e =>
-                      handleProductFormChange("rentalPrice", e.target.value)
-                    }
-                  />
+                  <Label htmlFor="productIsRentable">
+                    هل المنتج قابل للإيجار؟
+                  </Label>
+                  <select
+                    id="productIsRentable"
+                    value={productFormData.isRentable ? "yes" : "no"}
+                    onChange={e => {
+                      const isRentable = e.target.value === "yes";
+                      handleProductFormChange("isRentable", isRentable);
+                      if (!isRentable)
+                        handleProductFormChange("rentalPrice", "");
+                    }}
+                    className="w-full rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="no">لا</option>
+                    <option value="yes">نعم</option>
+                  </select>
                 </div>
-              )}
+                {productFormData.isRentable && (
+                  <div className="space-y-1">
+                    <Label htmlFor="productRentalPrice">
+                      سعر الإيجار (ر.س)
+                    </Label>
+                    <Input
+                      id="productRentalPrice"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={productFormData.rentalPrice}
+                      onChange={e =>
+                        handleProductFormChange("rentalPrice", e.target.value)
+                      }
+                      className="border-emerald-200 bg-white"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-1">
