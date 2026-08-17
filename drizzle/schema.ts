@@ -1,4 +1,14 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean, json } from "drizzle-orm/mysql-core";
+import {
+  int,
+  mysqlEnum,
+  mysqlTable,
+  text,
+  timestamp,
+  varchar,
+  decimal,
+  boolean,
+  json,
+} from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -61,6 +71,7 @@ export type InsertBrand = typeof brand.$inferInsert;
 // ─── Products Table ───────────────────────────────────────────────────────────
 export const products = mysqlTable("products", {
   id: int("id").autoincrement().primaryKey(),
+  productCode: varchar("productCode", { length: 64 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
   brand: varchar("brand", { length: 100 }).notNull(),
   category: varchar("category", { length: 100 }).notNull(),
@@ -132,13 +143,27 @@ export const orders = mysqlTable("orders", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),
-  status: mysqlEnum("status", ["pending", "processing", "shipped", "delivered", "cancelled"]).default("pending"),
+  status: mysqlEnum("status", [
+    "pending",
+    "processing",
+    "shipped",
+    "delivered",
+    "cancelled",
+  ]).default("pending"),
   paymentMethod: varchar("paymentMethod", { length: 100 }).notNull(),
   customerName: text("customerName"),
   customerPhone: varchar("customerPhone", { length: 20 }),
   shippingAddress: text("shippingAddress"),
-  items: json("items").$type<Array<{ productId: number; quantity: number; price: number; title?: string | null; image?: string | null }>>()
-,
+  items:
+    json("items").$type<
+      Array<{
+        productId: number;
+        quantity: number;
+        price: number;
+        title?: string | null;
+        image?: string | null;
+      }>
+    >(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

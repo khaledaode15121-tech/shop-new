@@ -20,7 +20,7 @@ import {
   category as categoryTable,
   brand as brandTable,
 } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import { ENV } from "./_core/env";
 import { eq, and, or, like, gte, lte, inArray, desc } from "drizzle-orm";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -88,7 +88,14 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     };
     const updateSet: Record<string, unknown> = {};
 
-    const textFields = ["name", "email", "phone", "address", "loginMethod", "token"] as const;
+    const textFields = [
+      "name",
+      "email",
+      "phone",
+      "address",
+      "loginMethod",
+      "token",
+    ] as const;
     type TextField = (typeof textFields)[number];
 
     const assignNullable = (field: TextField) => {
@@ -109,8 +116,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
+      values.role = "admin";
+      updateSet.role = "admin";
     }
 
     if (!values.lastSignedIn) {
@@ -148,7 +155,11 @@ export async function getUserByOpenId(openId: string) {
     return undefined;
   }
 
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
 }
@@ -160,14 +171,24 @@ export async function getUserByEmail(email: string) {
     return undefined;
   }
   try {
-    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    const result = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
     return result.length > 0 ? result[0] : undefined;
   } catch (err: any) {
     // Detect common migration mismatch (missing column) and surface a clearer message
     const msg = err && err.message ? String(err.message) : String(err);
-    if (/Unknown column|doesn't exist|column not found|Unknown column/.test(msg)) {
-      console.error(`[Database] Query failed selecting users.email. Possible schema mismatch. Error: ${msg}`);
-      console.error(`[Database] Ensure migrations have run (run 'pnpm run db:push') or add the missing columns (e.g. run ALTER TABLE users ADD COLUMN token TEXT NULL;)`);
+    if (
+      /Unknown column|doesn't exist|column not found|Unknown column/.test(msg)
+    ) {
+      console.error(
+        `[Database] Query failed selecting users.email. Possible schema mismatch. Error: ${msg}`
+      );
+      console.error(
+        `[Database] Ensure migrations have run (run 'pnpm run db:push') or add the missing columns (e.g. run ALTER TABLE users ADD COLUMN token TEXT NULL;)`
+      );
     } else {
       console.error("[Database] Failed getUserByEmail:", err);
     }
@@ -177,7 +198,20 @@ export async function getUserByEmail(email: string) {
 
 export async function updateUserById(
   id: number,
-  values: Partial<Pick<InsertUser, "openId" | "name" | "email" | "phone" | "address" | "loginMethod" | "lastSignedIn" | "role" | "token">>
+  values: Partial<
+    Pick<
+      InsertUser,
+      | "openId"
+      | "name"
+      | "email"
+      | "phone"
+      | "address"
+      | "loginMethod"
+      | "lastSignedIn"
+      | "role"
+      | "token"
+    >
+  >
 ) {
   const db = await getDb();
   if (!db) {
@@ -248,7 +282,9 @@ export async function updateUserAdmin(
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const values: Partial<Pick<InsertUser, "name" | "email" | "phone" | "address" | "role" | "openId">> = {};
+  const values: Partial<
+    Pick<InsertUser, "name" | "email" | "phone" | "address" | "role" | "openId">
+  > = {};
 
   if (data.name !== undefined) values.name = data.name.trim();
   if (data.phone !== undefined) values.phone = data.phone.trim() || null;
@@ -299,7 +335,11 @@ export async function getProductById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
 
-  const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
+  const result = await db
+    .select()
+    .from(products)
+    .where(eq(products.id, id))
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -330,14 +370,20 @@ export async function getCartItems(userId: number) {
     .where(eq(cartItems.userId, userId));
 }
 
-export async function addToCart(userId: number, productId: number, quantity: number = 1) {
+export async function addToCart(
+  userId: number,
+  productId: number,
+  quantity: number = 1
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   const existing = await db
     .select()
     .from(cartItems)
-    .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)))
+    .where(
+      and(eq(cartItems.userId, userId), eq(cartItems.productId, productId))
+    )
     .limit(1);
 
   if (existing.length > 0) {
@@ -345,7 +391,9 @@ export async function addToCart(userId: number, productId: number, quantity: num
     return db
       .update(cartItems)
       .set({ quantity: existing[0].quantity + quantity })
-      .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
+      .where(
+        and(eq(cartItems.userId, userId), eq(cartItems.productId, productId))
+      );
   } else {
     // Insert new cart item
     return db.insert(cartItems).values({ userId, productId, quantity });
@@ -358,10 +406,16 @@ export async function removeFromCart(userId: number, productId: number) {
 
   return db
     .delete(cartItems)
-    .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
+    .where(
+      and(eq(cartItems.userId, userId), eq(cartItems.productId, productId))
+    );
 }
 
-export async function updateCartItemQuantity(userId: number, productId: number, quantity: number) {
+export async function updateCartItemQuantity(
+  userId: number,
+  productId: number,
+  quantity: number
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
@@ -372,7 +426,9 @@ export async function updateCartItemQuantity(userId: number, productId: number, 
   return db
     .update(cartItems)
     .set({ quantity })
-    .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
+    .where(
+      and(eq(cartItems.userId, userId), eq(cartItems.productId, productId))
+    );
 }
 
 export async function clearCart(userId: number) {
@@ -401,18 +457,25 @@ export async function createOrderFromCart(
     throw new Error("عربة التسوق فارغة");
   }
 
-  const productIds = cart.map((item) => item.productId);
-  const productsInCart = await db.select().from(products).where(inArray(products.id, productIds));
-  const productMap = new Map(productsInCart.map((product) => [product.id, product]));
+  const productIds = cart.map(item => item.productId);
+  const productsInCart = await db
+    .select()
+    .from(products)
+    .where(inArray(products.id, productIds));
+  const productMap = new Map(
+    productsInCart.map(product => [product.id, product])
+  );
 
-  const orderItems = cart.map((item) => {
+  const orderItems = cart.map(item => {
     const product = productMap.get(item.productId);
     if (!product) {
       throw new Error(`المنتج ${item.productId} غير موجود`);
     }
     const stock = product.stock ?? 0;
     if (stock < item.quantity) {
-      throw new Error(`الكمية المطلوبة من المنتج ${product.name || item.productId} غير متوفرة`);
+      throw new Error(
+        `الكمية المطلوبة من المنتج ${product.name || item.productId} غير متوفرة`
+      );
     }
     return {
       productId: item.productId,
@@ -424,10 +487,13 @@ export async function createOrderFromCart(
     };
   });
 
-  const totalPrice = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPrice = orderItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
   const totalPriceFormatted = totalPrice.toFixed(2);
 
-  await db.transaction(async (tx) => {
+  await db.transaction(async tx => {
     for (const item of orderItems) {
       const product = productMap.get(item.productId)!;
       const stock = product.stock ?? 0;
@@ -446,17 +512,23 @@ export async function createOrderFromCart(
         customerName,
         customerPhone,
         shippingAddress,
-        items: orderItems.map(({ productId, quantity, price, title, image }) => ({
-          productId,
-          quantity,
-          price,
-          title,
-          image,
-        })),
+        items: orderItems.map(
+          ({ productId, quantity, price, title, image }) => ({
+            productId,
+            quantity,
+            price,
+            title,
+            image,
+          })
+        ),
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      if (/Unknown column|doesn't exist|column not found|Unknown column/.test(message)) {
+      if (
+        /Unknown column|doesn't exist|column not found|Unknown column/.test(
+          message
+        )
+      ) {
         throw new Error(
           "خطأ في بنية جدول الطلبات. تأكد من أن التعديلات على قاعدة البيانات تم تطبيقها (run `pnpm run db:push` مع إعداد DATABASE_URL)."
         );
@@ -473,7 +545,7 @@ export async function createOrderFromCart(
   };
 }
 
-export type OrderStatus = typeof orders.$inferSelect["status"];
+export type OrderStatus = (typeof orders.$inferSelect)["status"];
 
 export async function getOrdersByUser(userId: number) {
   const db = await getDb();
@@ -487,11 +559,11 @@ export async function getOrdersByUser(userId: number) {
 
   const productIds = Array.from(
     new Set(
-      orderRows.flatMap((order) =>
+      orderRows.flatMap(order =>
         Array.isArray(order.items)
           ? order.items
-              .filter((item) => !item?.title || !item?.image)
-              .map((item) => item.productId)
+              .filter(item => !item?.title || !item?.image)
+              .map(item => item.productId)
           : []
       )
     )
@@ -502,20 +574,28 @@ export async function getOrdersByUser(userId: number) {
   }
 
   const productsById = new Map(
-    (await db.select().from(products).where(inArray(products.id, productIds))).map((product) => [product.id, product])
+    (
+      await db.select().from(products).where(inArray(products.id, productIds))
+    ).map(product => [product.id, product])
   );
 
-  return orderRows.map((order) => {
+  return orderRows.map(order => {
     if (!Array.isArray(order.items)) {
       return order;
     }
 
     return {
       ...order,
-      items: order.items.map((item) => {
+      items: order.items.map(item => {
         const product = productsById.get(item.productId);
-        const title = item.title && item.title.toString().trim() ? item.title : product?.name ?? `المنتج ${item.productId}`;
-        const image = item.image && item.image.toString().trim() ? item.image : product?.image ?? null;
+        const title =
+          item.title && item.title.toString().trim()
+            ? item.title
+            : (product?.name ?? `المنتج ${item.productId}`);
+        const image =
+          item.image && item.image.toString().trim()
+            ? item.image
+            : (product?.image ?? null);
         return {
           ...item,
           title,
@@ -526,7 +606,11 @@ export async function getOrdersByUser(userId: number) {
   });
 }
 
-export async function updateOrderStatus(userId: number, orderId: number, status: OrderStatus) {
+export async function updateOrderStatus(
+  userId: number,
+  orderId: number,
+  status: OrderStatus
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
@@ -547,7 +631,13 @@ export async function updateOrderStatus(userId: number, orderId: number, status:
 export async function updateOrderItems(
   userId: number,
   orderId: number,
-  items: Array<{ productId: number; quantity: number; price: number; title?: string | null; image?: string | null }>,
+  items: Array<{
+    productId: number;
+    quantity: number;
+    price: number;
+    title?: string | null;
+    image?: string | null;
+  }>,
   paymentMethod?: string,
   shippingAddress?: string | null
 ) {
@@ -569,7 +659,9 @@ export async function updateOrderItems(
     throw new Error("لا يمكن تعديل الطلب بعد التسليم");
   }
 
-  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+  const totalPrice = items
+    .reduce((sum, item) => sum + item.price * item.quantity, 0)
+    .toFixed(2);
 
   const updatePayload: {
     items: typeof items;
@@ -608,7 +700,10 @@ export async function getWishlistItems(userId: number) {
   const db = await getDb();
   if (!db) return [];
 
-  return db.select().from(wishlistItems).where(eq(wishlistItems.userId, userId));
+  return db
+    .select()
+    .from(wishlistItems)
+    .where(eq(wishlistItems.userId, userId));
 }
 
 export async function addToWishlist(userId: number, productId: number) {
@@ -618,7 +713,12 @@ export async function addToWishlist(userId: number, productId: number) {
   const existing = await db
     .select()
     .from(wishlistItems)
-    .where(and(eq(wishlistItems.userId, userId), eq(wishlistItems.productId, productId)))
+    .where(
+      and(
+        eq(wishlistItems.userId, userId),
+        eq(wishlistItems.productId, productId)
+      )
+    )
     .limit(1);
 
   if (existing.length > 0) {
@@ -634,7 +734,12 @@ export async function removeFromWishlist(userId: number, productId: number) {
 
   return db
     .delete(wishlistItems)
-    .where(and(eq(wishlistItems.userId, userId), eq(wishlistItems.productId, productId)));
+    .where(
+      and(
+        eq(wishlistItems.userId, userId),
+        eq(wishlistItems.productId, productId)
+      )
+    );
 }
 
 export async function isInWishlist(userId: number, productId: number) {
@@ -644,7 +749,12 @@ export async function isInWishlist(userId: number, productId: number) {
   const result = await db
     .select()
     .from(wishlistItems)
-    .where(and(eq(wishlistItems.userId, userId), eq(wishlistItems.productId, productId)))
+    .where(
+      and(
+        eq(wishlistItems.userId, userId),
+        eq(wishlistItems.productId, productId)
+      )
+    )
     .limit(1);
 
   return result.length > 0;
@@ -665,7 +775,13 @@ export async function getUserReviews(userId: number) {
   return db.select().from(reviews).where(eq(reviews.userId, userId));
 }
 
-export async function createReview(userId: number, productId: number, rating: number, title: string, comment?: string) {
+export async function createReview(
+  userId: number,
+  productId: number,
+  rating: number,
+  title: string,
+  comment?: string
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
@@ -683,7 +799,12 @@ export async function createReview(userId: number, productId: number, rating: nu
   });
 }
 
-export async function updateReview(reviewId: number, rating: number, title: string, comment?: string) {
+export async function updateReview(
+  reviewId: number,
+  rating: number,
+  title: string,
+  comment?: string
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
@@ -691,7 +812,10 @@ export async function updateReview(reviewId: number, rating: number, title: stri
     throw new Error("Rating must be between 1 and 5");
   }
 
-  return db.update(reviews).set({ rating, title, comment }).where(eq(reviews.id, reviewId));
+  return db
+    .update(reviews)
+    .set({ rating, title, comment })
+    .where(eq(reviews.id, reviewId));
 }
 
 export async function deleteReview(reviewId: number) {
@@ -705,7 +829,11 @@ export async function markReviewAsHelpful(reviewId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const review = await db.select().from(reviews).where(eq(reviews.id, reviewId)).limit(1);
+  const review = await db
+    .select()
+    .from(reviews)
+    .where(eq(reviews.id, reviewId))
+    .limit(1);
   if (review.length === 0) throw new Error("Review not found");
 
   const currentReview = review[0];
@@ -717,13 +845,15 @@ export async function markReviewAsHelpful(reviewId: number) {
     .where(eq(reviews.id, reviewId));
 }
 
-
 // ─── Search & Filter Functions ───────────────────────────────────────────────
 export async function getCategories() {
   const db = await getDb();
   if (!db) return [];
 
-  const result = await db.select({ name: categoryTable.name }).from(categoryTable).where(eq(categoryTable.isActive, true));
+  const result = await db
+    .select({ name: categoryTable.name })
+    .from(categoryTable)
+    .where(eq(categoryTable.isActive, true));
   return result.map(r => r.name).filter(Boolean);
 }
 
@@ -734,13 +864,24 @@ export async function getAllCategories() {
   return db.select().from(categoryTable).orderBy(desc(categoryTable.id));
 }
 
-export async function createCategoryAdmin(data: { name: string; slug?: string; description?: string; image?: string; isActive?: boolean }) {
+export async function createCategoryAdmin(data: {
+  name: string;
+  slug?: string;
+  description?: string;
+  image?: string;
+  isActive?: boolean;
+}) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   const payload: InsertCategory = {
     name: data.name,
-    slug: data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+    slug:
+      data.slug ||
+      data.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, ""),
     description: data.description,
     image: data.image,
     isActive: data.isActive ?? true,
@@ -749,19 +890,30 @@ export async function createCategoryAdmin(data: { name: string; slug?: string; d
   const result = await db.insert(categoryTable).values(payload);
   const insertId = extractInsertId(result);
   if (typeof insertId === "number") {
-    const created = await db.select().from(categoryTable).where(eq(categoryTable.id, insertId)).limit(1);
+    const created = await db
+      .select()
+      .from(categoryTable)
+      .where(eq(categoryTable.id, insertId))
+      .limit(1);
     return created[0] ?? null;
   }
 
   return null;
 }
 
-export async function updateCategoryAdmin(id: number, data: Partial<InsertCategory>) {
+export async function updateCategoryAdmin(
+  id: number,
+  data: Partial<InsertCategory>
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   await db.update(categoryTable).set(data).where(eq(categoryTable.id, id));
-  const updated = await db.select().from(categoryTable).where(eq(categoryTable.id, id)).limit(1);
+  const updated = await db
+    .select()
+    .from(categoryTable)
+    .where(eq(categoryTable.id, id))
+    .limit(1);
   return updated[0] ?? null;
 }
 
@@ -776,21 +928,37 @@ export async function deleteCategoryAdmin(id: number) {
 export async function getBrands() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(brandTable).where(eq(brandTable.isActive, true)).orderBy(desc(brandTable.id));
+  return db
+    .select()
+    .from(brandTable)
+    .where(eq(brandTable.isActive, true))
+    .orderBy(desc(brandTable.id));
 }
 
 export async function getProductColors() {
   const db = await getDb();
   if (!db) return [];
   const result = await db.select({ color: products.color }).from(products);
-  return Array.from(new Set(result.map((row) => row.color).filter((value): value is string => Boolean(value?.trim()))));
+  return Array.from(
+    new Set(
+      result
+        .map(row => row.color)
+        .filter((value): value is string => Boolean(value?.trim()))
+    )
+  );
 }
 
 export async function getProductSizes() {
   const db = await getDb();
   if (!db) return [];
   const result = await db.select({ size: products.size }).from(products);
-  return Array.from(new Set(result.map((row) => row.size).filter((value): value is string => Boolean(value?.trim()))));
+  return Array.from(
+    new Set(
+      result
+        .map(row => row.size)
+        .filter((value): value is string => Boolean(value?.trim()))
+    )
+  );
 }
 
 export async function getAllBrands() {
@@ -799,14 +967,24 @@ export async function getAllBrands() {
   return db.select().from(brandTable).orderBy(desc(brandTable.id));
 }
 
-
-export async function createBrandAdmin(data: { name: string; slug?: string; description?: string; logo?: string; isActive?: boolean }) {
+export async function createBrandAdmin(data: {
+  name: string;
+  slug?: string;
+  description?: string;
+  logo?: string;
+  isActive?: boolean;
+}) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   const payload: InsertBrand = {
     name: data.name,
-    slug: data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+    slug:
+      data.slug ||
+      data.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, ""),
     description: data.description,
     logo: data.logo,
     isActive: data.isActive ?? true,
@@ -815,7 +993,11 @@ export async function createBrandAdmin(data: { name: string; slug?: string; desc
   const result = await db.insert(brandTable).values(payload);
   const insertId = extractInsertId(result);
   if (typeof insertId === "number") {
-    const created = await db.select().from(brandTable).where(eq(brandTable.id, insertId)).limit(1);
+    const created = await db
+      .select()
+      .from(brandTable)
+      .where(eq(brandTable.id, insertId))
+      .limit(1);
     return created[0] ?? null;
   }
 
@@ -827,7 +1009,11 @@ export async function updateBrandAdmin(id: number, data: Partial<InsertBrand>) {
   if (!db) throw new Error("Database not available");
 
   await db.update(brandTable).set(data).where(eq(brandTable.id, id));
-  const updated = await db.select().from(brandTable).where(eq(brandTable.id, id)).limit(1);
+  const updated = await db
+    .select()
+    .from(brandTable)
+    .where(eq(brandTable.id, id))
+    .limit(1);
   return updated[0] ?? null;
 }
 
@@ -861,10 +1047,11 @@ export async function searchProducts(filters: {
   // Apply filters on client side
   if (filters.query) {
     const searchTerm = filters.query.toLowerCase();
-    results = results.filter(p => 
-      p.name.toLowerCase().includes(searchTerm) ||
-      (p.description?.toLowerCase().includes(searchTerm)) ||
-      p.brand.toLowerCase().includes(searchTerm)
+    results = results.filter(
+      p =>
+        p.name.toLowerCase().includes(searchTerm) ||
+        p.description?.toLowerCase().includes(searchTerm) ||
+        p.brand.toLowerCase().includes(searchTerm)
     );
   }
 
@@ -896,10 +1083,14 @@ export async function searchProducts(filters: {
 
   // Color and size filters
   if (filters.colors && filters.colors.length > 0) {
-    results = results.filter(p => p.color ? filters.colors!.includes(p.color) : false);
+    results = results.filter(p =>
+      p.color ? filters.colors!.includes(p.color) : false
+    );
   }
   if (filters.sizes && filters.sizes.length > 0) {
-    results = results.filter(p => p.size ? filters.sizes!.includes(p.size) : false);
+    results = results.filter(p =>
+      p.size ? filters.sizes!.includes(p.size) : false
+    );
   }
 
   // Limit results
@@ -911,24 +1102,32 @@ export async function searchProducts(filters: {
 export async function getDashboardStats() {
   const db = await getDb();
   if (!db) {
-    console.warn("[Database] Cannot get dashboard stats: database not available");
+    console.warn(
+      "[Database] Cannot get dashboard stats: database not available"
+    );
     return null;
   }
 
   try {
     // Get total products count
     const totalProducts = await db.select().from(products);
-    
+
     // Get total users count
     const totalUsers = await db.select().from(users);
-    
+
     // Get total reviews count
     const totalReviews = await db.select().from(reviews);
-    
+
     // Get average rating
-    const avgRating = totalReviews.length > 0
-      ? (totalReviews.reduce((sum, r) => sum + (parseInt(String(r.rating) || '0') || 0), 0) / totalReviews.length).toFixed(1)
-      : '0';
+    const avgRating =
+      totalReviews.length > 0
+        ? (
+            totalReviews.reduce(
+              (sum, r) => sum + (parseInt(String(r.rating) || "0") || 0),
+              0
+            ) / totalReviews.length
+          ).toFixed(1)
+        : "0";
 
     return {
       totalProducts: totalProducts.length,
@@ -961,10 +1160,26 @@ export async function getAllProducts() {
   }
 }
 
-export async function updateProductAdmin(id: number, data: Partial<Product> & { categoryId?: number | null; brandId?: number | null }) {
+function buildProductCode(
+  brandId: number | null | undefined,
+  categoryId: number | null | undefined,
+  sequence: number
+) {
+  return `${brandId ?? 0}-${categoryId ?? 0}-${String(sequence).padStart(6, "0")}`;
+}
+
+export async function updateProductAdmin(
+  id: number,
+  data: Partial<Product> & {
+    categoryId?: number | null;
+    brandId?: number | null;
+  }
+) {
   const db = await getDb();
   if (!db) {
-    throw new Error("Database not available. Please check your DATABASE_URL environment variable.");
+    throw new Error(
+      "Database not available. Please check your DATABASE_URL environment variable."
+    );
   }
 
   try {
@@ -973,7 +1188,8 @@ export async function updateProductAdmin(id: number, data: Partial<Product> & { 
     if (data.brand !== undefined) updateData.brand = data.brand;
     if (data.price !== undefined) updateData.price = data.price;
     if (data.oldPrice !== undefined) updateData.oldPrice = data.oldPrice;
-    if (data.description !== undefined) updateData.description = data.description;
+    if (data.description !== undefined)
+      updateData.description = data.description;
     if (data.category !== undefined) updateData.category = data.category;
     if (data.stock !== undefined) updateData.stock = data.stock;
     if (data.isOnSale !== undefined) updateData.isOnSale = data.isOnSale;
@@ -985,18 +1201,40 @@ export async function updateProductAdmin(id: number, data: Partial<Product> & { 
     if (data.categoryId !== undefined) {
       updateData.categoryId = data.categoryId ?? null;
       if (data.categoryId) {
-        const categoryRow = await db.select().from(categoryTable).where(eq(categoryTable.id, data.categoryId)).limit(1);
+        const categoryRow = await db
+          .select()
+          .from(categoryTable)
+          .where(eq(categoryTable.id, data.categoryId))
+          .limit(1);
         if (categoryRow[0]) updateData.category = categoryRow[0].name;
       }
     }
     if (data.brandId !== undefined) {
       updateData.brandId = data.brandId ?? null;
       if (data.brandId) {
-        const brandRow = await db.select().from(brandTable).where(eq(brandTable.id, data.brandId)).limit(1);
+        const brandRow = await db
+          .select()
+          .from(brandTable)
+          .where(eq(brandTable.id, data.brandId))
+          .limit(1);
         if (brandRow[0]) updateData.brand = brandRow[0].name;
       }
     }
 
+    if (data.categoryId !== undefined || data.brandId !== undefined) {
+      const currentProduct = await getProductById(id);
+      const finalBrandId =
+        data.brandId !== undefined ? data.brandId : currentProduct?.brandId;
+      const finalCategoryId =
+        data.categoryId !== undefined
+          ? data.categoryId
+          : currentProduct?.categoryId;
+      updateData.productCode = buildProductCode(
+        finalBrandId,
+        finalCategoryId,
+        id
+      );
+    }
     await db.update(products).set(updateData).where(eq(products.id, id));
     const updatedProduct = await getProductById(id);
     if (!updatedProduct) {
@@ -1005,14 +1243,18 @@ export async function updateProductAdmin(id: number, data: Partial<Product> & { 
     return updatedProduct;
   } catch (error) {
     console.error("[Database] Failed to update product:", error);
-    throw new Error(`Failed to update product: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to update product: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 
 export async function deleteProductAdmin(id: number) {
   const db = await getDb();
   if (!db) {
-    throw new Error("Database not available. Please check your DATABASE_URL environment variable.");
+    throw new Error(
+      "Database not available. Please check your DATABASE_URL environment variable."
+    );
   }
 
   try {
@@ -1020,7 +1262,9 @@ export async function deleteProductAdmin(id: number) {
     return true;
   } catch (error) {
     console.error("[Database] Failed to delete product:", error);
-    throw new Error(`Failed to delete product: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to delete product: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 
@@ -1074,7 +1318,9 @@ export async function createProductAdmin(data: {
 }) {
   const db = await getDb();
   if (!db) {
-    throw new Error("Database not available. Please check your DATABASE_URL environment variable.");
+    throw new Error(
+      "Database not available. Please check your DATABASE_URL environment variable."
+    );
   }
 
   try {
@@ -1082,12 +1328,20 @@ export async function createProductAdmin(data: {
     let brandName = data.brand;
 
     if (data.categoryId) {
-      const categoryRow = await db.select().from(categoryTable).where(eq(categoryTable.id, data.categoryId)).limit(1);
+      const categoryRow = await db
+        .select()
+        .from(categoryTable)
+        .where(eq(categoryTable.id, data.categoryId))
+        .limit(1);
       if (categoryRow[0]) categoryName = categoryRow[0].name;
     }
 
     if (data.brandId) {
-      const brandRow = await db.select().from(brandTable).where(eq(brandTable.id, data.brandId)).limit(1);
+      const brandRow = await db
+        .select()
+        .from(brandTable)
+        .where(eq(brandTable.id, data.brandId))
+        .limit(1);
       if (brandRow[0]) brandName = brandRow[0].name;
     }
 
@@ -1107,26 +1361,52 @@ export async function createProductAdmin(data: {
       badgeColor: data.badgeColor,
       color: data.color || null,
       size: data.size || null,
+      productCode: `TEMP-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       rating: "0",
       reviewCount: 0,
     });
 
     const insertId = extractInsertId(result);
     if (typeof insertId === "number") {
+      await db
+        .update(products)
+        .set({
+          productCode: buildProductCode(
+            data.brandId,
+            data.categoryId,
+            insertId
+          ),
+        })
+        .where(eq(products.id, insertId));
       const newProduct = await getProductById(insertId);
       if (newProduct) {
         return newProduct;
       }
     }
 
-    const [latestProduct] = await db.select().from(products).orderBy(desc(products.id)).limit(1);
+    const [latestProduct] = await db
+      .select()
+      .from(products)
+      .orderBy(desc(products.id))
+      .limit(1);
     if (!latestProduct) {
       throw new Error("Failed to retrieve newly created product.");
     }
-
-    return latestProduct;
+    await db
+      .update(products)
+      .set({
+        productCode: buildProductCode(
+          data.brandId,
+          data.categoryId,
+          latestProduct.id
+        ),
+      })
+      .where(eq(products.id, latestProduct.id));
+    return getProductById(latestProduct.id);
   } catch (error) {
     console.error("[Database] Failed to create product:", error);
-    throw new Error(`Failed to create product: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to create product: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }

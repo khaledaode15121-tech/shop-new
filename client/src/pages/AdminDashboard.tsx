@@ -1064,6 +1064,9 @@ export default function AdminDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead className="text-right">
+                            معرف المنتج
+                          </TableHead>
                           <TableHead className="text-right">الصورة</TableHead>
                           <TableHead className="text-right">الاسم</TableHead>
                           <TableHead className="text-right">الفئة</TableHead>
@@ -1079,6 +1082,9 @@ export default function AdminDashboard() {
                       <TableBody>
                         {filteredProducts.map((product: any) => (
                           <TableRow key={product.id}>
+                            <TableCell className="font-mono text-xs font-semibold text-blue-700">
+                              {product.productCode || "—"}
+                            </TableCell>
                             <TableCell>
                               {product.image ? (
                                 <img
