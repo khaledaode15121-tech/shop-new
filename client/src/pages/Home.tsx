@@ -822,8 +822,12 @@ function CatalogHero({
                 <input
                   ref={searchInputRef}
                   value={query}
-                  onChange={event => setQuery(event.target.value)}
-                  placeholder="اكتب اسم المنتج أو البراند..."
+                  onChange={event => {
+                    const value = event.target.value;
+                    setQuery(value);
+                    onSearch(value);
+                  }}
+                  placeholder="اكتب اسم المنتج أو الوصف..."
                   className="h-full min-w-0 flex-1 bg-transparent px-1 text-right text-sm text-slate-800 outline-none"
                   style={{ fontFamily: "'Cairo', sans-serif" }}
                   autoComplete="off"
@@ -1018,12 +1022,13 @@ function ProductsSection({
 }) {
   const [, navigate] = useLocation();
   const { user } = useAuth();
+  const normalizedSearchQuery = searchQuery.trim();
   const searchResult = trpc.products.search.useQuery({
-    query: searchQuery || undefined,
+    query: normalizedSearchQuery || undefined,
     limit: 24,
   });
   const productList = trpc.products.list.useQuery(undefined, {
-    enabled: !searchQuery,
+    enabled: !normalizedSearchQuery,
   });
   const { data: categories = [] } = trpc.products.categories.useQuery();
   const [sortBy, setSortBy] = useState<
@@ -1032,10 +1037,10 @@ function ProductsSection({
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>();
   const [selectedColor, setSelectedColor] = useState<string | undefined>();
   const [selectedSize, setSelectedSize] = useState<string | undefined>();
-  const products = searchQuery
+  const products = normalizedSearchQuery
     ? (searchResult.data ?? [])
     : (productList.data ?? []);
-  const productsLoading = searchQuery
+  const productsLoading = normalizedSearchQuery
     ? searchResult.isLoading
     : productList.isLoading;
   const womenCategory = useMemo(
