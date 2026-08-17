@@ -587,12 +587,13 @@ function CatalogHero({
           <img
             src={heroImage}
             alt={featuredProduct?.name || "عروض خاصة"}
-            className="absolute inset-0 h-full w-full object-cover transition-all duration-[1400ms] ease-in-out"
+            className="absolute inset-0 h-full object-cover transition-all duration-[1400ms] ease-in-out"
+            style={{width:"35%"}}
           />
           <div className="absolute inset-0 bg-gradient-to-l from-[#0b1220]/80 via-[#0b1220]/20 to-[#0b1220]/65" />
 
           <div className="relative z-10 px-4 py-5 md:px-8 md:py-8">
-            <div className="mb-6 flex justify-end">
+            {/* <div className="mb-6 flex justify-end">
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
@@ -602,11 +603,11 @@ function CatalogHero({
                 <Search className="h-4 w-4" />
                 بحث سريع
               </button>
-            </div>
+            </div> */}
 
             <div className="flex flex-col gap-6 md:min-h-[420px] md:flex-row md:items-end md:justify-between">
               <div className="w-full max-w-[680px]">
-                <form onSubmit={submitSearch} className="flex overflow-hidden rounded-[18px] border border-white/80 bg-white shadow-lg shadow-slate-900/20">
+                {/* <form onSubmit={submitSearch} className="flex overflow-hidden rounded-[18px] border border-white/80 bg-white shadow-lg shadow-slate-900/20">
                   <button
                     type="button"
                     onClick={() => setSearchOpen(true)}
@@ -631,7 +632,7 @@ function CatalogHero({
                   >
                     بحث
                   </button>
-                </form>
+                </form> */}
               </div>
 
               <div className="max-w-[500px] text-right text-white md:pb-2">
@@ -1588,7 +1589,7 @@ function WhatsAppButton() {
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
-export default function Home() {
+export default function () {
   useScrollReveal();
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
