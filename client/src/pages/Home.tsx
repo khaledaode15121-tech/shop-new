@@ -636,12 +636,10 @@ function CatalogHero({
                           onCategoryChange(category);
                           clearBrandMenuTimer();
                           setActiveBrand(null);
-                          document
-                            .getElementById("products")
-                            ?.scrollIntoView({
-                              behavior: "smooth",
-                              block: "start",
-                            });
+                          document.getElementById("products")?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
                         }}
                         className={`block w-full rounded-xl px-2 py-2 text-center text-sm font-medium transition ${selectedCategory === category ? "bg-[#fff7ed] text-[#f97316]" : "text-slate-800 hover:bg-[#f8fafc] hover:text-[#0f172a]"}`}
                         style={{ fontFamily: "'Cairo', sans-serif" }}
@@ -1031,6 +1029,7 @@ function ProductsSection({
   const [sortBy, setSortBy] = useState<
     "newest" | "price-asc" | "price-desc" | "brand-asc" | "brand-desc"
   >("newest");
+  const [selectedBrand, setSelectedBrand] = useState<string | undefined>();
   const products = searchQuery
     ? (searchResult.data ?? [])
     : (productList.data ?? []);
@@ -1041,6 +1040,13 @@ function ProductsSection({
     () => categories.find(category => /نسائ|نساء|women/i.test(category)),
     [categories]
   );
+  const brandOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(products.map(product => product.brand?.trim()).filter(Boolean))
+      ).sort((a, b) => String(a).localeCompare(String(b), "ar")),
+    [products]
+  );
   const filteredProducts = useMemo(() => {
     let results = products;
     if (selectedCategory === "العروض") {
@@ -1049,6 +1055,9 @@ function ProductsSection({
       results = results.filter(
         product => product.category === selectedCategory
       );
+    }
+    if (selectedBrand) {
+      results = results.filter(product => product.brand === selectedBrand);
     }
 
     return [...results].sort((a, b) => {
@@ -1065,7 +1074,7 @@ function ProductsSection({
       }
       return 0;
     });
-  }, [products, selectedCategory, sortBy]);
+  }, [products, selectedCategory, selectedBrand, sortBy]);
 
   const addToCartMutation = trpc.cart.add.useMutation({
     onSuccess: () => {
@@ -1231,6 +1240,27 @@ function ProductsSection({
                   className="flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]"
                   style={{ fontFamily: "'Cairo', sans-serif" }}
                 >
+                  <span>العلامة التجارية:</span>
+                  <select
+                    value={selectedBrand ?? ""}
+                    onChange={event =>
+                      setSelectedBrand(event.target.value || undefined)
+                    }
+                    className="max-w-[170px] bg-transparent font-semibold outline-none"
+                    aria-label="التصفية حسب العلامة التجارية"
+                  >
+                    <option value="">كل العلامات التجارية</option>
+                    {brandOptions.map(brand => (
+                      <option key={brand} value={brand}>
+                        {brand}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label
+                  className="flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   <span>الفرز:</span>
                   <select
                     value={sortBy}
@@ -1247,6 +1277,18 @@ function ProductsSection({
                     <option value="brand-desc">العلامة التجارية: ي-أ</option>
                   </select>
                 </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedBrand(undefined);
+                    setSortBy("newest");
+                    onCategoryChange(undefined);
+                  }}
+                  className="rounded-xl border border-[#fed7aa] bg-[#fff7ed] px-3 py-2 text-sm font-semibold text-[#ea580c] transition hover:bg-[#ffedd5]"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
+                  إلغاء كل الفلاتر
+                </button>
               </div>
               <div
                 className="flex items-center gap-2 text-sm text-[#666]"
