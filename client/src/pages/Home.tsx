@@ -612,45 +612,45 @@ function CatalogHero({
             </div> */}
 
             <div dir="rtl" className="grid w-full gap-6 md:min-h-[420px] md:grid-cols-2 md:items-end">
-              <div className="rounded-[24px] border border-white/15 bg-slate-950/25 p-5 text-right backdrop-blur-sm md:p-6">
+              <div className="rounded-[24px] border border-blue-200/80 bg-[#dbeafe] p-5 text-right shadow-[0_12px_28px_rgba(30,64,175,0.14)] md:p-6">
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <span className="text-xs font-semibold text-slate-300" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  <span className="text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     العلامة التجارية
                   </span>
-                  <span className="rounded-full bg-[#fbbf24]/15 px-3 py-1 text-sm font-bold text-[#fbbf24]" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  <span className="rounded-full bg-blue-600 px-3 py-1 text-sm font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     {heroBrand}
                   </span>
                 </div>
-                <p className="mb-2 text-xs font-semibold text-slate-300" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <p className="mb-2 text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
                   الفئة
                 </p>
-                <h1 className="text-3xl font-black leading-tight text-white md:text-4xl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <h1 className="text-3xl font-black leading-tight text-slate-900 md:text-4xl" style={{ fontFamily: "'Cairo', sans-serif" }}>
                   {heroCategory}
                 </h1>
-                <p className="mt-4 text-xs font-semibold text-slate-300" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <p className="mt-4 text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
                   اسم المنتج
                 </p>
-                <h2 className="mt-1 text-xl font-bold leading-relaxed text-[#dbeafe]" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <h2 className="mt-1 text-xl font-bold leading-relaxed text-blue-950" style={{ fontFamily: "'Cairo', sans-serif" }}>
                   {featuredProduct?.name || "منتج مميز"}
                 </h2>
-                <p className="mt-4 text-xs font-semibold text-slate-300" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <p className="mt-4 text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
                   الوصف
                 </p>
-                <p className="mt-1 max-w-[440px] text-sm leading-7 text-slate-200 md:text-base" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                <p className="mt-1 max-w-[440px] text-sm leading-7 text-slate-700 md:text-base" style={{ fontFamily: "'Tajawal', sans-serif" }}>
                   {heroDescription}
                 </p>
-                <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/15 pt-4">
-                  <span className="text-xs font-semibold text-slate-300" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <div className="mt-5 flex items-center justify-between gap-3 border-t border-blue-200 pt-4">
+                  <span className="text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     السعر
                   </span>
-                  <span className="text-xl font-black text-[#fbbf24]" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  <span className="text-xl font-black text-blue-700" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     {heroPrice}
                   </span>
                 </div>
               </div>
 
-              <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[24px] border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm md:min-h-[280px]">
-                <p className="max-w-[420px] text-base font-semibold leading-8 text-white md:text-lg" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+              <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[24px] border border-blue-200/80 bg-[#dbeafe] p-6 text-center shadow-[0_12px_28px_rgba(30,64,175,0.14)] md:min-h-[280px]">
+                <p className="max-w-[420px] text-base font-semibold leading-8 text-slate-800 md:text-lg" style={{ fontFamily: "'Tajawal', sans-serif" }}>
                   اكتشف أحدث المنتجات والبرندات والفئات المتوفرة في متجرنا مع عروض حصرية ومواصفات قوية.
                 </p>
                 <button
