@@ -446,7 +446,7 @@ function CatalogHero({
   const heroImage = featuredProduct?.image || "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1600&q=80";
   const heroBrand = featuredProduct?.brand || "إلكترونيات";
   const heroCategory = featuredProduct?.category || "منتجات مميزة";
-  const heroDescription = featuredProduct?.description || "اكتشف أحدث المنتجات والبرندات والفئات المتوفرة في متجرنا مع عروض حصرية ومواصفات قوية.";
+  const heroDescription = featuredProduct?.description?.trim() || "لا يوجد وصف لهذا المنتج حاليًا.";
   const heroPrice = featuredProduct?.price != null ? `${Number(featuredProduct.price).toLocaleString("ar-SA")} ر.س` : "السعر عند الطلب";
 
   useEffect(() => {
@@ -612,43 +612,48 @@ function CatalogHero({
             </div> */}
 
             <div dir="rtl" className="grid w-full gap-6 md:min-h-[420px] md:grid-cols-2 md:items-end">
-              <div className="rounded-[24px] border-0 bg-gradient-to-br from-[#eff6ff]/90 via-[#dbeafe]/80 to-[#bfdbfe]/90 p-5 text-right shadow-none md:p-6">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <span className="text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
+              <div className="rounded-[22px] bg-[#dbeafe] p-5 text-right md:p-6">
+                <div className="flex items-center justify-between gap-4 py-2">
+                  <span className="text-sm font-medium text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     العلامة التجارية
                   </span>
                   <span className="rounded-full bg-blue-600 px-3 py-1 text-sm font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     {heroBrand}
                   </span>
                 </div>
-                <p className="mb-2 text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  الفئة
-                </p>
-                <h1 className="text-3xl font-black leading-tight text-slate-900 md:text-4xl" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  {heroCategory}
-                </h1>
-                <p className="mt-4 text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  اسم المنتج
-                </p>
-                <h2 className="mt-1 text-xl font-bold leading-relaxed text-blue-950" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  {featuredProduct?.name || "منتج مميز"}
-                </h2>
-                <p className="mt-4 text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  الوصف
-                </p>
-                <p className="mt-1 max-w-[440px] text-sm leading-7 text-slate-700 md:text-base" style={{ fontFamily: "'Tajawal', sans-serif" }}>
-                  {heroDescription}
-                </p>
-                <div className="mt-5 flex items-center justify-between gap-3 pt-4">
-                  <span className="text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <div className="flex items-center justify-between gap-4 py-2">
+                  <span className="text-sm font-medium text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    الفئة
+                  </span>
+                  <span className="text-lg font-bold text-slate-900" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    {heroCategory}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-4 py-2">
+                  <span className="text-sm font-medium text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    اسم المنتج
+                  </span>
+                  <h2 className="text-lg font-bold leading-relaxed text-blue-950" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    {featuredProduct?.name || "منتج مميز"}
+                  </h2>
+                </div>
+                <div className="flex items-start justify-between gap-4 py-2">
+                  <span className="shrink-0 text-sm font-medium text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    الوصف
+                  </span>
+                  <p className="max-w-[380px] text-left text-sm leading-7 text-slate-700 md:text-base" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                    {heroDescription}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-4 py-2">
+                  <span className="text-sm font-medium text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     السعر
                   </span>
                   <span className="text-xl font-black text-blue-700" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     {heroPrice}
                   </span>
                 </div>
-              </div>
-
+                            </div>
               <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[24px] border-0 bg-gradient-to-bl from-[#dbeafe]/80 via-[#bfdbfe]/80 to-[#93c5fd]/70 p-6 text-center shadow-none md:min-h-[280px]">
                 <p className="max-w-[420px] text-base font-semibold leading-8 text-slate-800 md:text-lg" style={{ fontFamily: "'Tajawal', sans-serif" }}>
                   اكتشف أحدث المنتجات والبرندات والفئات المتوفرة في متجرنا مع عروض حصرية ومواصفات قوية.
