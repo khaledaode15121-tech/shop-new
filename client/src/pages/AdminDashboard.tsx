@@ -1328,6 +1328,9 @@ export default function AdminDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead className="text-right">
+                            معرف الفئة
+                          </TableHead>
                           <TableHead className="text-right">الاسم</TableHead>
                           <TableHead className="text-right">الحالة</TableHead>
                           <TableHead className="text-right">
@@ -1339,7 +1342,7 @@ export default function AdminDashboard() {
                         {categoriesLoading ? (
                           <TableRow>
                             <TableCell
-                              colSpan={3}
+                              colSpan={4}
                               className="text-center text-sm text-gray-400"
                             >
                               جاري التحميل...
@@ -1348,6 +1351,9 @@ export default function AdminDashboard() {
                         ) : (
                           (categories || []).map((category: any) => (
                             <TableRow key={category.id}>
+                              <TableCell className="font-mono text-xs text-gray-600">
+                                {category.id}
+                              </TableCell>
                               <TableCell>{category.name}</TableCell>
                               <TableCell>
                                 {category.isActive === false
@@ -1498,6 +1504,9 @@ export default function AdminDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead className="text-right">
+                            معرف البرند
+                          </TableHead>
                           <TableHead className="text-right">الاسم</TableHead>
                           <TableHead className="text-right">الحالة</TableHead>
                           <TableHead className="text-right">
@@ -1509,7 +1518,7 @@ export default function AdminDashboard() {
                         {brandsLoading ? (
                           <TableRow>
                             <TableCell
-                              colSpan={3}
+                              colSpan={4}
                               className="text-center text-sm text-gray-400"
                             >
                               جاري التحميل...
@@ -1518,6 +1527,9 @@ export default function AdminDashboard() {
                         ) : (
                           (brands || []).map((brand: any) => (
                             <TableRow key={brand.id}>
+                              <TableCell className="font-mono text-xs text-gray-600">
+                                {brand.id}
+                              </TableCell>
                               <TableCell>{brand.name}</TableCell>
                               <TableCell>
                                 {brand.isActive === false ? "غير نشط" : "نشط"}
