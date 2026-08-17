@@ -1039,6 +1039,9 @@ function ProductsSection({
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>();
   const [selectedColor, setSelectedColor] = useState<string | undefined>();
   const [selectedSize, setSelectedSize] = useState<string | undefined>();
+  const [rentalFilter, setRentalFilter] = useState<
+    "all" | "rentable" | "not-rentable"
+  >("all");
   const products = normalizedSearchQuery
     ? (searchResult.data ?? [])
     : (productList.data ?? []);
@@ -1088,6 +1091,11 @@ function ProductsSection({
     if (selectedSize) {
       results = results.filter(product => product.size === selectedSize);
     }
+    if (rentalFilter === "rentable") {
+      results = results.filter(product => Boolean(product.isRentable));
+    } else if (rentalFilter === "not-rentable") {
+      results = results.filter(product => !Boolean(product.isRentable));
+    }
 
     return [...results].sort((a, b) => {
       if (sortBy === "price-asc" || sortBy === "price-desc") {
@@ -1109,6 +1117,7 @@ function ProductsSection({
     selectedBrand,
     selectedColor,
     selectedSize,
+    rentalFilter,
     sortBy,
   ]);
 
@@ -1366,6 +1375,24 @@ function ProductsSection({
                   className="flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]"
                   style={{ fontFamily: "'Cairo', sans-serif" }}
                 >
+                  <span>الإيجار:</span>
+                  <select
+                    value={rentalFilter}
+                    onChange={event =>
+                      setRentalFilter(event.target.value as typeof rentalFilter)
+                    }
+                    className="bg-transparent font-semibold outline-none"
+                    aria-label="التصفية حسب قابلية الإيجار"
+                  >
+                    <option value="all">كل المنتجات</option>
+                    <option value="rentable">القابلة للإيجار فقط</option>
+                    <option value="not-rentable">غير القابلة للإيجار</option>
+                  </select>
+                </label>
+                <label
+                  className="flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   <span>الفرز:</span>
                   <select
                     value={sortBy}
@@ -1388,6 +1415,7 @@ function ProductsSection({
                     setSelectedBrand(undefined);
                     setSelectedColor(undefined);
                     setSelectedSize(undefined);
+                    setRentalFilter("all");
                     setSortBy("newest");
                     onCategoryChange(undefined);
                   }}
