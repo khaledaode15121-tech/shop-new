@@ -587,16 +587,18 @@ function CatalogHero({
           })}
         </div>
 
-        <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-white shadow-[0_25px_80px_rgba(15,23,42,0.12)]">
-          <img
-            src={heroImage}
-            alt={featuredProduct?.name || "عروض خاصة"}
-            className="absolute inset-0 h-full object-cover transition-all duration-[1400ms] ease-in-out"
-            style={{width:"35%"}}
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-[#0b1220]/80 via-[#0b1220]/20 to-[#0b1220]/65" />
+        <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-[#0b1220] shadow-[0_25px_80px_rgba(15,23,42,0.12)]">
+          <div dir="rtl" className="grid md:grid-cols-[35%_65%]">
+            <div className="relative min-h-[300px] overflow-hidden md:min-h-[420px]">
+              <img
+                src={heroImage}
+                alt={featuredProduct?.name || "عروض خاصة"}
+                className="absolute inset-0 h-full w-full object-cover transition-all duration-[1400ms] ease-in-out"
+              />
+              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#0b1220]/10 to-[#0b1220]/35" />
+            </div>
 
-          <div className="relative z-10 px-4 py-5 md:px-8 md:py-8">
+            <div className="relative z-10 px-4 py-5 md:px-8 md:py-8">
             {/* <div className="mb-6 flex justify-end">
               <button
                 type="button"
@@ -660,6 +662,7 @@ function CatalogHero({
                   تسوق الآن
                 </button>
               </div>
+            </div>
             </div>
           </div>
         </div>
