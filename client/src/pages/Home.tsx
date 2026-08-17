@@ -444,6 +444,10 @@ function CatalogHero({
   const liveQuery = query.trim();
   const featuredProduct = saleProducts[activeImageIndex] ?? saleProducts[0] ?? null;
   const heroImage = featuredProduct?.image || "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1600&q=80";
+  const heroBrand = featuredProduct?.brand || "إلكترونيات";
+  const heroCategory = featuredProduct?.category || "منتجات مميزة";
+  const heroDescription = featuredProduct?.description || "اكتشف أحدث المنتجات والبرندات والفئات المتوفرة في متجرنا مع عروض حصرية ومواصفات قوية.";
+  const heroPrice = featuredProduct?.price != null ? `${Number(featuredProduct.price).toLocaleString("ar-SA")} ر.س` : "السعر عند الطلب";
 
   useEffect(() => {
     if (saleProducts.length <= 1) return;
@@ -637,14 +641,16 @@ function CatalogHero({
 
               <div className="max-w-[500px] text-right text-white md:pb-2">
                 <p className="mb-3 text-sm font-medium text-[#fbbf24]" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  عروض وتقنيات جديدة
+                  {heroBrand}
                 </p>
                 <h1 className="text-3xl font-black leading-tight md:text-5xl" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  كل ما تحتاجه
-                  <span className="mt-2 block text-[#dbeafe]">في مكان واحد</span>
+                  {heroCategory}
                 </h1>
                 <p className="mt-4 max-w-[440px] text-sm leading-7 text-slate-200 md:text-base" style={{ fontFamily: "'Tajawal', sans-serif" }}>
-                  اكتشف أحدث المنتجات والبرندات والفئات المتوفرة في متجرنا مع عروض حصرية ومواصفات قوية.
+                  {heroDescription}
+                </p>
+                <p className="mt-4 text-xl font-black text-[#fbbf24]" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                  السعر: {heroPrice}
                 </p>
                 <div className="mt-6 flex justify-end">
                   <button
