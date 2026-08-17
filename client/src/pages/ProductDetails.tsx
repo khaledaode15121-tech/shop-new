@@ -3,7 +3,16 @@ import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Star, ShoppingCart, Heart, Share2, Truck, Shield, RefreshCw, MessageCircle } from "lucide-react";
+import {
+  Star,
+  ShoppingCart,
+  Heart,
+  Share2,
+  Truck,
+  Shield,
+  RefreshCw,
+  MessageCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 
@@ -18,9 +27,10 @@ export default function ProductDetails() {
   const productId = id ? parseInt(id) : 0;
 
   // Fetch product details
-  const { data: product, isLoading: productLoading } = trpc.products.byId.useQuery(productId, {
-    enabled: !!productId,
-  });
+  const { data: product, isLoading: productLoading } =
+    trpc.products.byId.useQuery(productId, {
+      enabled: !!productId,
+    });
 
   // Fetch reviews
   const { data: reviews = [] } = trpc.reviews.byProduct.useQuery(productId, {
@@ -39,7 +49,10 @@ export default function ProductDetails() {
     },
     onError: (error: any) => {
       console.error("Cart error:", error);
-      if (error?.message?.includes("UNAUTHORIZED") || error?.message?.includes("unauthorized")) {
+      if (
+        error?.message?.includes("UNAUTHORIZED") ||
+        error?.message?.includes("unauthorized")
+      ) {
         toast.error("انتهت جلستك، يرجى تسجيل الدخول مجدداً");
         setTimeout(() => {
           window.location.href = getLoginUrl();
@@ -88,7 +101,10 @@ export default function ProductDetails() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">المنتج غير موجود</p>
-          <Button onClick={() => navigate("/")} className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            onClick={() => navigate("/")}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             العودة للرئيسية
           </Button>
         </div>
@@ -97,7 +113,15 @@ export default function ProductDetails() {
   }
 
   const images = product.images || [product.image || ""];
-  const avgRating = reviews.length > 0 ? (reviews.reduce((sum: number, r: any) => sum + parseInt(r.rating || "0"), 0) / reviews.length).toFixed(1) : 0;
+  const avgRating =
+    reviews.length > 0
+      ? (
+          reviews.reduce(
+            (sum: number, r: any) => sum + parseInt(r.rating || "0"),
+            0
+          ) / reviews.length
+        ).toFixed(1)
+      : 0;
 
   const handleAddToCart = () => {
     if (!user) {
@@ -152,7 +176,11 @@ export default function ProductDetails() {
           {/* Images */}
           <div>
             <div className="bg-white rounded-2xl overflow-hidden mb-4 aspect-square flex items-center justify-center">
-              <img src={images[selectedImage]} alt={product.name} className="w-full h-full object-contain bg-[#f8f8f8] p-2" />
+              <img
+                src={images[selectedImage]}
+                alt={product.name}
+                className="w-full h-full object-contain bg-[#f8f8f8] p-2"
+              />
             </div>
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
@@ -161,10 +189,16 @@ export default function ProductDetails() {
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
                     className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImage === idx ? "border-blue-600" : "border-gray-200"
+                      selectedImage === idx
+                        ? "border-blue-600"
+                        : "border-gray-200"
                     }`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-contain bg-[#f8f8f8] p-1.5" />
+                    <img
+                      src={img}
+                      alt=""
+                      className="w-full h-full object-contain bg-[#f8f8f8] p-1.5"
+                    />
                   </button>
                 ))}
               </div>
@@ -175,23 +209,61 @@ export default function ProductDetails() {
           <div>
             {/* Badge */}
             {product.badge && (
-              <div className={`inline-block ${product.badgeColor} text-white text-xs font-bold px-3 py-1 rounded-lg mb-4`}>
+              <div
+                className={`inline-block ${product.badgeColor} text-white text-xs font-bold px-3 py-1 rounded-lg mb-4`}
+              >
                 {product.badge}
               </div>
             )}
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2" style={{ fontFamily: "'Cairo', sans-serif" }}>
+            <h1
+              className="text-3xl md:text-4xl font-black text-gray-900 mb-2"
+              style={{ fontFamily: "'Cairo', sans-serif" }}
+            >
               {product.name}
             </h1>
-            <p className="text-blue-600 text-sm font-semibold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <p
+              className="text-blue-600 text-sm font-semibold mb-2"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
               {product.brand}
             </p>
+            <p className="mb-4 text-xs font-mono text-gray-500" dir="ltr">
+              معرف المنتج: {product.productCode}
+            </p>
+
+            {product.isRentable && product.rentalPrice && (
+              <div
+                className="mb-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+                style={{ fontFamily: "'Cairo', sans-serif" }}
+              >
+                <span className="font-bold">متاح للإيجار</span>
+                <span className="mx-2">—</span>
+                <span>
+                  سعر الإيجار:{" "}
+                  <strong>
+                    {Number(product.rentalPrice).toLocaleString("ar-SA")} ر.س
+                  </strong>
+                </span>
+              </div>
+            )}
 
             {(product.color || product.size) && (
-              <div className="mb-5 flex flex-wrap gap-2 text-sm" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                {product.color && <span className="rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">اللون: <strong>{product.color}</strong></span>}
-                {product.size && <span className="rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">المقاس: <strong>{product.size}</strong></span>}
+              <div
+                className="mb-5 flex flex-wrap gap-2 text-sm"
+                style={{ fontFamily: "'Cairo', sans-serif" }}
+              >
+                {product.color && (
+                  <span className="rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">
+                    اللون: <strong>{product.color}</strong>
+                  </span>
+                )}
+                {product.size && (
+                  <span className="rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">
+                    المقاس: <strong>{product.size}</strong>
+                  </span>
+                )}
               </div>
             )}
 
@@ -213,29 +285,45 @@ export default function ProductDetails() {
             {/* Price */}
             <div className="mb-8 pb-8 border-b border-gray-200">
               <div className="flex items-baseline gap-3 mb-2">
-                <div className="text-4xl font-black text-blue-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div
+                  className="text-4xl font-black text-blue-600"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                >
                   {product.price.toLocaleString()} ر.س
                 </div>
                 {product.oldPrice && (
-                  <div className="text-xl text-gray-400 line-through" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <div
+                    className="text-xl text-gray-400 line-through"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
                     {product.oldPrice.toLocaleString()} ر.س
                   </div>
                 )}
               </div>
               {(product.stock ?? 0) > 0 ? (
-                <p className="text-green-600 text-sm font-semibold">متوفر في المخزون</p>
+                <p className="text-green-600 text-sm font-semibold">
+                  متوفر في المخزون
+                </p>
               ) : (
-                <p className="text-red-600 text-sm font-semibold">غير متوفر حالياً</p>
+                <p className="text-red-600 text-sm font-semibold">
+                  غير متوفر حالياً
+                </p>
               )}
             </div>
 
             {/* Description */}
             {product.description && (
               <div className="mb-8">
-                <h3 className="font-bold text-gray-900 mb-3" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <h3
+                  className="font-bold text-gray-900 mb-3"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   الوصف
                 </h3>
-                <p className="text-gray-600 leading-relaxed" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                <p
+                  className="text-gray-600 leading-relaxed"
+                  style={{ fontFamily: "'Tajawal', sans-serif" }}
+                >
                   {product.description}
                 </p>
               </div>
@@ -253,7 +341,9 @@ export default function ProductDetails() {
                 <input
                   type="number"
                   value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={e =>
+                    setQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                  }
                   className="w-16 text-center border-0 outline-none"
                   min="1"
                 />
@@ -267,7 +357,9 @@ export default function ProductDetails() {
 
               <Button
                 onClick={handleAddToCart}
-                disabled={(product.stock ?? 0) === 0 || addToCartMutation.isPending}
+                disabled={
+                  (product.stock ?? 0) === 0 || addToCartMutation.isPending
+                }
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl"
                 style={{ fontFamily: "'Cairo', sans-serif" }}
               >
@@ -280,10 +372,15 @@ export default function ProductDetails() {
                 variant="outline"
                 className="px-6 border-gray-300 hover:bg-gray-100"
               >
-                <Heart className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+                <Heart
+                  className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`}
+                />
               </Button>
 
-              <Button variant="outline" className="px-6 border-gray-300 hover:bg-gray-100">
+              <Button
+                variant="outline"
+                className="px-6 border-gray-300 hover:bg-gray-100"
+              >
                 <Share2 className="w-5 h-5" />
               </Button>
             </div>
@@ -300,7 +397,10 @@ export default function ProductDetails() {
                   <div key={i} className="flex items-center gap-3">
                     <Icon className="w-5 h-5 text-blue-600 flex-shrink-0" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                      <p
+                        className="font-semibold text-gray-900 text-sm"
+                        style={{ fontFamily: "'Cairo', sans-serif" }}
+                      >
                         {feature.title}
                       </p>
                       <p className="text-gray-600 text-xs">{feature.desc}</p>
@@ -314,17 +414,25 @@ export default function ProductDetails() {
 
         {/* Reviews Section */}
         <div className="bg-white rounded-2xl p-8 border border-gray-100">
-          <h2 className="text-2xl font-black text-gray-900 mb-6" style={{ fontFamily: "'Cairo', sans-serif" }}>
+          <h2
+            className="text-2xl font-black text-gray-900 mb-6"
+            style={{ fontFamily: "'Cairo', sans-serif" }}
+          >
             التقييمات ({reviews.length})
           </h2>
 
           {reviews.length > 0 ? (
             <div className="space-y-6">
-              {reviews.slice(0, 5).map((review) => (
-                <div key={review.id} className="border-b border-gray-100 pb-6 last:border-0">
+              {reviews.slice(0, 5).map(review => (
+                <div
+                  key={review.id}
+                  className="border-b border-gray-100 pb-6 last:border-0"
+                >
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <p className="font-semibold text-gray-900">{review.title}</p>
+                      <p className="font-semibold text-gray-900">
+                        {review.title}
+                      </p>
                       <div className="flex items-center gap-2 mt-1">
                         {[...Array(5)].map((_, i) => (
                           <Star
@@ -338,13 +446,17 @@ export default function ProductDetails() {
                   <p className="text-gray-600 text-sm mb-3">{review.comment}</p>
                   <div className="flex items-center gap-4 text-xs text-gray-500">
                     <span>مفيد ({review.helpful})</span>
-                    {review.verified && <span className="text-green-600">✓ تم التحقق</span>}
+                    {review.verified && (
+                      <span className="text-green-600">✓ تم التحقق</span>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-600 text-center py-8">لا توجد تقييمات حتى الآن</p>
+            <p className="text-gray-600 text-center py-8">
+              لا توجد تقييمات حتى الآن
+            </p>
           )}
 
           {/* Write Review Button */}

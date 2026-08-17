@@ -73,6 +73,8 @@ interface ProductFormData {
   badgeColor: string;
   color: string;
   size: string;
+  isRentable: boolean;
+  rentalPrice: string;
 }
 
 interface CategoryFormData {
@@ -115,6 +117,8 @@ const emptyProductForm: ProductFormData = {
   badgeColor: "bg-blue-600",
   color: "",
   size: "",
+  isRentable: false,
+  rentalPrice: "",
 };
 
 const emptyCategoryForm: CategoryFormData = {
@@ -455,6 +459,8 @@ export default function AdminDashboard() {
       badgeColor: product.badgeColor || "bg-blue-600",
       color: product.color || "",
       size: product.size || "",
+      isRentable: Boolean(product.isRentable),
+      rentalPrice: product.rentalPrice ? String(product.rentalPrice) : "",
     });
     setIsProductDialogOpen(true);
   }
@@ -536,6 +542,10 @@ export default function AdminDashboard() {
         badgeColor: productFormData.badgeColor || undefined,
         color: productFormData.color || undefined,
         size: productFormData.size || undefined,
+        isRentable: productFormData.isRentable,
+        rentalPrice: productFormData.isRentable
+          ? productFormData.rentalPrice || undefined
+          : undefined,
       });
     } else {
       createProductMutation.mutate({
@@ -554,6 +564,10 @@ export default function AdminDashboard() {
         badgeColor: productFormData.badgeColor || undefined,
         color: productFormData.color || undefined,
         size: productFormData.size || undefined,
+        isRentable: productFormData.isRentable,
+        rentalPrice: productFormData.isRentable
+          ? productFormData.rentalPrice || undefined
+          : undefined,
       });
     }
   }
@@ -1071,6 +1085,12 @@ export default function AdminDashboard() {
                           <TableHead className="text-right">الاسم</TableHead>
                           <TableHead className="text-right">الفئة</TableHead>
                           <TableHead className="text-right">السعر</TableHead>
+                          <TableHead className="text-right">
+                            قابل للإيجار
+                          </TableHead>
+                          <TableHead className="text-right">
+                            سعر الإيجار
+                          </TableHead>
                           <TableHead className="text-right">المخزون</TableHead>
                           <TableHead className="text-right">عرض؟</TableHead>
                           <TableHead className="text-right">التقييم</TableHead>
@@ -1124,6 +1144,18 @@ export default function AdminDashboard() {
                                   ر.س
                                 </div>
                               )}
+                            </TableCell>
+                            <TableCell>
+                              <span
+                                className={`text-xs font-medium rounded-full px-2 py-1 ${product.isRentable ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}
+                              >
+                                {product.isRentable ? "نعم" : "لا"}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-sm font-semibold text-emerald-700">
+                              {product.isRentable && product.rentalPrice
+                                ? `${Number(product.rentalPrice).toLocaleString("ar-SA")} ر.س`
+                                : "—"}
                             </TableCell>
                             <TableCell>
                               <span
@@ -1908,6 +1940,43 @@ export default function AdminDashboard() {
                   step="0.01"
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="productIsRentable">
+                  هل المنتج قابل للإيجار؟
+                </Label>
+                <select
+                  id="productIsRentable"
+                  value={productFormData.isRentable ? "yes" : "no"}
+                  onChange={e => {
+                    const isRentable = e.target.value === "yes";
+                    handleProductFormChange("isRentable", isRentable);
+                    if (!isRentable) handleProductFormChange("rentalPrice", "");
+                  }}
+                  className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="no">لا</option>
+                  <option value="yes">نعم</option>
+                </select>
+              </div>
+              {productFormData.isRentable && (
+                <div className="space-y-1">
+                  <Label htmlFor="productRentalPrice">سعر الإيجار (ر.س)</Label>
+                  <Input
+                    id="productRentalPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={productFormData.rentalPrice}
+                    onChange={e =>
+                      handleProductFormChange("rentalPrice", e.target.value)
+                    }
+                  />
+                </div>
+              )}
             </div>
 
             <div className="space-y-1">

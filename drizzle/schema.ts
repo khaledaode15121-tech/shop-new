@@ -80,6 +80,8 @@ export const products = mysqlTable("products", {
   description: text("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   oldPrice: decimal("oldPrice", { precision: 10, scale: 2 }),
+  isRentable: boolean("isRentable").default(false).notNull(),
+  rentalPrice: decimal("rentalPrice", { precision: 10, scale: 2 }),
   image: text("image"), // URL to image
   images: json("images").$type<string[]>(), // Array of image URLs
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
@@ -154,16 +156,15 @@ export const orders = mysqlTable("orders", {
   customerName: text("customerName"),
   customerPhone: varchar("customerPhone", { length: 20 }),
   shippingAddress: text("shippingAddress"),
-  items:
-    json("items").$type<
-      Array<{
-        productId: number;
-        quantity: number;
-        price: number;
-        title?: string | null;
-        image?: string | null;
-      }>
-    >(),
+  items: json("items").$type<
+    Array<{
+      productId: number;
+      quantity: number;
+      price: number;
+      title?: string | null;
+      image?: string | null;
+    }>
+  >(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

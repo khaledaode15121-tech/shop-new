@@ -1160,12 +1160,20 @@ export async function getAllProducts() {
   }
 }
 
+function makeBrandShortCode(brandName: string | null | undefined) {
+  const normalized = String(brandName ?? "BRD")
+    .trim()
+    .replace(/\s+/g, "")
+    .toUpperCase();
+  return Array.from(normalized).slice(0, 3).join("") || "BRD";
+}
+
 function buildProductCode(
-  brandId: number | null | undefined,
+  brandName: string | null | undefined,
   categoryId: number | null | undefined,
   sequence: number
 ) {
-  return `${brandId ?? 0}-${categoryId ?? 0}-${String(sequence).padStart(6, "0")}`;
+  return `${makeBrandShortCode(brandName)}-${categoryId ?? 0}-${String(sequence).padStart(6, "0")}`;
 }
 
 export async function updateProductAdmin(
@@ -1198,6 +1206,14 @@ export async function updateProductAdmin(
     if (data.badgeColor !== undefined) updateData.badgeColor = data.badgeColor;
     if (data.color !== undefined) updateData.color = data.color || null;
     if (data.size !== undefined) updateData.size = data.size || null;
+    if (data.isRentable !== undefined) {
+      updateData.isRentable = data.isRentable;
+      updateData.rentalPrice = data.isRentable
+        ? data.rentalPrice || null
+        : null;
+    } else if (data.rentalPrice !== undefined) {
+      updateData.rentalPrice = data.rentalPrice || null;
+    }
     if (data.categoryId !== undefined) {
       updateData.categoryId = data.categoryId ?? null;
       if (data.categoryId) {
@@ -1221,16 +1237,19 @@ export async function updateProductAdmin(
       }
     }
 
-    if (data.categoryId !== undefined || data.brandId !== undefined) {
+    if (
+      data.categoryId !== undefined ||
+      data.brandId !== undefined ||
+      data.brand !== undefined
+    ) {
       const currentProduct = await getProductById(id);
-      const finalBrandId =
-        data.brandId !== undefined ? data.brandId : currentProduct?.brandId;
+      const finalBrandName = updateData.brand ?? currentProduct?.brand;
       const finalCategoryId =
         data.categoryId !== undefined
           ? data.categoryId
           : currentProduct?.categoryId;
       updateData.productCode = buildProductCode(
-        finalBrandId,
+        finalBrandName,
         finalCategoryId,
         id
       );
@@ -1315,6 +1334,8 @@ export async function createProductAdmin(data: {
   badgeColor?: string;
   color?: string;
   size?: string;
+  isRentable?: boolean;
+  rentalPrice?: string;
 }) {
   const db = await getDb();
   if (!db) {
@@ -1361,6 +1382,8 @@ export async function createProductAdmin(data: {
       badgeColor: data.badgeColor,
       color: data.color || null,
       size: data.size || null,
+      isRentable: data.isRentable ?? false,
+      rentalPrice: data.isRentable ? data.rentalPrice || null : null,
       productCode: `TEMP-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       rating: "0",
       reviewCount: 0,
@@ -1371,11 +1394,7 @@ export async function createProductAdmin(data: {
       await db
         .update(products)
         .set({
-          productCode: buildProductCode(
-            data.brandId,
-            data.categoryId,
-            insertId
-          ),
+          productCode: buildProductCode(brandName, data.categoryId, insertId),
         })
         .where(eq(products.id, insertId));
       const newProduct = await getProductById(insertId);
@@ -1396,7 +1415,7 @@ export async function createProductAdmin(data: {
       .update(products)
       .set({
         productCode: buildProductCode(
-          data.brandId,
+          brandName,
           data.categoryId,
           latestProduct.id
         ),
