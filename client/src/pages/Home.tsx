@@ -587,7 +587,7 @@ function CatalogHero({
           })}
         </div>
 
-        <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-[#0b1220] shadow-[0_25px_80px_rgba(15,23,42,0.12)]">
+        <div className="relative overflow-hidden rounded-[28px] border-0 bg-gradient-to-br from-[#bfdbfe] via-[#dbeafe] to-[#93c5fd] shadow-[0_25px_80px_rgba(30,64,175,0.16)]">
           <div dir="rtl" className="grid md:grid-cols-[35%_65%]">
             <div className="relative min-h-[300px] overflow-hidden md:min-h-[420px]">
               <img
@@ -595,7 +595,7 @@ function CatalogHero({
                 alt={featuredProduct?.name || "عروض خاصة"}
                 className="absolute inset-0 h-full w-full object-cover transition-all duration-[1400ms] ease-in-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#0b1220]/10 to-[#0b1220]/35" />
+              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#dbeafe]/10 to-[#93c5fd]/20" />
             </div>
 
             <div className="relative z-10 px-4 py-5 md:px-8 md:py-8">
@@ -612,7 +612,7 @@ function CatalogHero({
             </div> */}
 
             <div dir="rtl" className="grid w-full gap-6 md:min-h-[420px] md:grid-cols-2 md:items-end">
-              <div className="rounded-[24px] border border-blue-200/80 bg-[#dbeafe] p-5 text-right shadow-[0_12px_28px_rgba(30,64,175,0.14)] md:p-6">
+              <div className="rounded-[24px] border-0 bg-gradient-to-br from-[#eff6ff]/90 via-[#dbeafe]/80 to-[#bfdbfe]/90 p-5 text-right shadow-none md:p-6">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <span className="text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     العلامة التجارية
@@ -639,7 +639,7 @@ function CatalogHero({
                 <p className="mt-1 max-w-[440px] text-sm leading-7 text-slate-700 md:text-base" style={{ fontFamily: "'Tajawal', sans-serif" }}>
                   {heroDescription}
                 </p>
-                <div className="mt-5 flex items-center justify-between gap-3 border-t border-blue-200 pt-4">
+                <div className="mt-5 flex items-center justify-between gap-3 pt-4">
                   <span className="text-xs font-semibold text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
                     السعر
                   </span>
@@ -649,7 +649,7 @@ function CatalogHero({
                 </div>
               </div>
 
-              <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[24px] border border-blue-200/80 bg-[#dbeafe] p-6 text-center shadow-[0_12px_28px_rgba(30,64,175,0.14)] md:min-h-[280px]">
+              <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[24px] border-0 bg-gradient-to-bl from-[#dbeafe]/80 via-[#bfdbfe]/80 to-[#93c5fd]/70 p-6 text-center shadow-none md:min-h-[280px]">
                 <p className="max-w-[420px] text-base font-semibold leading-8 text-slate-800 md:text-lg" style={{ fontFamily: "'Tajawal', sans-serif" }}>
                   اكتشف أحدث المنتجات والبرندات والفئات المتوفرة في متجرنا مع عروض حصرية ومواصفات قوية.
                 </p>
