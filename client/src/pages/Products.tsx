@@ -8,6 +8,7 @@ import {
   Filter,
   X,
   ChevronDown,
+  ArrowUpDown,
   Scale,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -22,6 +23,9 @@ export default function Products() {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<
+    "newest" | "price-asc" | "price-desc" | "brand-asc" | "brand-desc"
+  >("newest");
   const [showFilters, setShowFilters] = useState(false);
   const { addProduct, isInComparison } = useComparison();
 
@@ -31,36 +35,76 @@ export default function Products() {
   const { data: colors = [] } = trpc.products.colors.useQuery();
   const { data: sizes = [] } = trpc.products.sizes.useQuery();
 
+  const womenCategory = useMemo(
+    () => categories.find(category => /نسائ|نساء|women/i.test(category)),
+    [categories]
+  );
+  const isWomenOnly = Boolean(
+    womenCategory && selectedCategories.includes(womenCategory)
+  );
+
   // Search and filter products
-  const { data: searchResults = [], isLoading } = trpc.products.search.useQuery({
-    query: searchQuery || undefined,
-    minPrice,
-    maxPrice,
-    minRating,
-    categories: selectedCategories.length > 0 ? selectedCategories : (undefined as any),
-    brands: selectedBrands.length > 0 ? selectedBrands : (undefined as any),
-    colors: selectedColors.length > 0 ? selectedColors : (undefined as any),
-    sizes: selectedSizes.length > 0 ? selectedSizes : (undefined as any),
-    limit: 50,
-  });
+  const { data: searchResults = [], isLoading } = trpc.products.search.useQuery(
+    {
+      query: searchQuery || undefined,
+      minPrice,
+      maxPrice,
+      minRating,
+      categories:
+        selectedCategories.length > 0 ? selectedCategories : (undefined as any),
+      brands: selectedBrands.length > 0 ? selectedBrands : (undefined as any),
+      colors: selectedColors.length > 0 ? selectedColors : (undefined as any),
+      sizes: selectedSizes.length > 0 ? selectedSizes : (undefined as any),
+      limit: 50,
+    }
+  );
+
+  const sortedResults = useMemo(() => {
+    const results = [...searchResults];
+    return results.sort((a, b) => {
+      if (sortBy === "price-asc" || sortBy === "price-desc") {
+        const difference = Number(a.price) - Number(b.price);
+        return sortBy === "price-asc" ? difference : -difference;
+      }
+
+      if (sortBy === "brand-asc" || sortBy === "brand-desc") {
+        const difference = String(a.brand || "").localeCompare(
+          String(b.brand || ""),
+          "ar"
+        );
+        return sortBy === "brand-asc" ? difference : -difference;
+      }
+
+      return 0;
+    });
+  }, [searchResults, sortBy]);
 
   // Toggle category
   const toggleCategory = (category: string) => {
-    setSelectedCategories((prev) =>
+    setSelectedCategories(prev =>
       prev.includes(category)
-        ? prev.filter((c) => c !== category)
+        ? prev.filter(c => c !== category)
         : [...prev, category]
     );
   };
 
   const toggleBrand = (brand: string) => {
-    setSelectedBrands((prev) =>
-      prev.includes(brand) ? prev.filter((item) => item !== brand) : [...prev, brand]
+    setSelectedBrands(prev =>
+      prev.includes(brand)
+        ? prev.filter(item => item !== brand)
+        : [...prev, brand]
     );
   };
 
-  const toggleValue = (value: string, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
-    setter((prev) => prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]);
+  const toggleValue = (
+    value: string,
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    setter(prev =>
+      prev.includes(value)
+        ? prev.filter(item => item !== value)
+        : [...prev, value]
+    );
   };
 
   // Clear all filters
@@ -73,6 +117,7 @@ export default function Products() {
     setSelectedBrands([]);
     setSelectedColors([]);
     setSelectedSizes([]);
+    setSortBy("newest");
   };
 
   // Check if any filters are active
@@ -91,7 +136,10 @@ export default function Products() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="container py-4">
-          <h1 className="text-3xl font-black text-gray-900 mb-4" style={{ fontFamily: "'Cairo', sans-serif" }}>
+          <h1
+            className="text-3xl font-black text-gray-900 mb-4"
+            style={{ fontFamily: "'Cairo', sans-serif" }}
+          >
             تصفح المنتجات
           </h1>
 
@@ -102,7 +150,7 @@ export default function Products() {
               type="text"
               placeholder="ابحث عن منتج..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
               style={{ fontFamily: "'Tajawal', sans-serif" }}
             />
@@ -113,10 +161,15 @@ export default function Products() {
       <div className="container py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
-          <div className={`lg:col-span-1 ${showFilters ? "block" : "hidden lg:block"}`}>
+          <div
+            className={`lg:col-span-1 ${showFilters ? "block" : "hidden lg:block"}`}
+          >
             <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-20">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-gray-900" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <h2
+                  className="text-lg font-bold text-gray-900"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   الفلاتر
                 </h2>
                 {hasActiveFilters && (
@@ -131,31 +184,52 @@ export default function Products() {
 
               {/* Price Range */}
               <div className="mb-6 pb-6 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-800 mb-4 text-sm" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <h3
+                  className="font-semibold text-gray-800 mb-4 text-sm"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   نطاق السعر
                 </h3>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                    <label
+                      className="text-xs text-gray-600 mb-1 block"
+                      style={{ fontFamily: "'Tajawal', sans-serif" }}
+                    >
                       السعر الأدنى (ر.س)
                     </label>
                     <input
                       type="number"
                       placeholder="0"
                       value={minPrice || ""}
-                      onChange={(e) => setMinPrice(e.target.value ? parseFloat(e.target.value) : undefined)}
+                      onChange={e =>
+                        setMinPrice(
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
+                        )
+                      }
                       className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-blue-500 outline-none text-sm"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                    <label
+                      className="text-xs text-gray-600 mb-1 block"
+                      style={{ fontFamily: "'Tajawal', sans-serif" }}
+                    >
                       السعر الأعلى (ر.س)
                     </label>
                     <input
                       type="number"
                       placeholder="10000"
                       value={maxPrice || ""}
-                      onChange={(e) => setMaxPrice(e.target.value ? parseFloat(e.target.value) : undefined)}
+                      onChange={e =>
+                        setMaxPrice(
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
+                        )
+                      }
                       className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-blue-500 outline-none text-sm"
                     />
                   </div>
@@ -164,14 +238,19 @@ export default function Products() {
 
               {/* Rating Filter */}
               <div className="mb-6 pb-6 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-800 mb-4 text-sm" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <h3
+                  className="font-semibold text-gray-800 mb-4 text-sm"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   التقييم الأدنى
                 </h3>
                 <div className="space-y-2">
-                  {[5, 4, 3, 2, 1].map((rating) => (
+                  {[5, 4, 3, 2, 1].map(rating => (
                     <button
                       key={rating}
-                      onClick={() => setMinRating(minRating === rating ? undefined : rating)}
+                      onClick={() =>
+                        setMinRating(minRating === rating ? undefined : rating)
+                      }
                       className={`w-full text-right text-sm py-2 px-3 rounded-lg transition-colors ${
                         minRating === rating
                           ? "bg-blue-600 text-white"
@@ -200,11 +279,14 @@ export default function Products() {
 
               {/* Brands */}
               <div className="mb-6 pb-6 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-800 mb-4 text-sm" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <h3
+                  className="font-semibold text-gray-800 mb-4 text-sm"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   البرندات
                 </h3>
                 <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
-                  {brands.map((brand) => (
+                  {brands.map(brand => (
                     <button
                       key={brand.id}
                       onClick={() => toggleBrand(brand.name)}
@@ -216,10 +298,20 @@ export default function Products() {
                       style={{ fontFamily: "'Cairo', sans-serif" }}
                     >
                       <span className="flex min-w-0 items-center gap-2">
-                        {brand.logo ? <img src={brand.logo} alt="" className="h-5 w-5 rounded object-contain" /> : <span className="h-2 w-2 rounded-full bg-orange-500" />}
+                        {brand.logo ? (
+                          <img
+                            src={brand.logo}
+                            alt=""
+                            className="h-5 w-5 rounded object-contain"
+                          />
+                        ) : (
+                          <span className="h-2 w-2 rounded-full bg-orange-500" />
+                        )}
                         <span className="truncate">{brand.name}</span>
                       </span>
-                      {selectedBrands.includes(brand.name) && <span className="text-xs">✓</span>}
+                      {selectedBrands.includes(brand.name) && (
+                        <span className="text-xs">✓</span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -228,9 +320,14 @@ export default function Products() {
               {/* Colors */}
               {colors.length > 0 && (
                 <div className="mb-6 border-b border-gray-100 pb-6">
-                  <h3 className="mb-4 text-sm font-semibold text-gray-800" style={{ fontFamily: "'Cairo', sans-serif" }}>اللون</h3>
+                  <h3
+                    className="mb-4 text-sm font-semibold text-gray-800"
+                    style={{ fontFamily: "'Cairo', sans-serif" }}
+                  >
+                    اللون
+                  </h3>
                   <div className="flex flex-wrap gap-2">
-                    {colors.map((color) => (
+                    {colors.map(color => (
                       <button
                         key={color}
                         onClick={() => toggleValue(color, setSelectedColors)}
@@ -247,9 +344,14 @@ export default function Products() {
               {/* Sizes */}
               {sizes.length > 0 && (
                 <div className="mb-6 border-b border-gray-100 pb-6">
-                  <h3 className="mb-4 text-sm font-semibold text-gray-800" style={{ fontFamily: "'Cairo', sans-serif" }}>المقاس</h3>
+                  <h3
+                    className="mb-4 text-sm font-semibold text-gray-800"
+                    style={{ fontFamily: "'Cairo', sans-serif" }}
+                  >
+                    المقاس
+                  </h3>
                   <div className="flex flex-wrap gap-2">
-                    {sizes.map((size) => (
+                    {sizes.map(size => (
                       <button
                         key={size}
                         onClick={() => toggleValue(size, setSelectedSizes)}
@@ -263,13 +365,35 @@ export default function Products() {
                 </div>
               )}
 
+              {/* Women's products shortcut */}
+              {womenCategory && (
+                <div className="mb-6 border-b border-gray-100 pb-6">
+                  <button
+                    type="button"
+                    onClick={() => toggleCategory(womenCategory)}
+                    className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-right text-sm font-semibold transition-colors ${
+                      isWomenOnly
+                        ? "bg-pink-600 text-white"
+                        : "bg-pink-50 text-pink-700 hover:bg-pink-100"
+                    }`}
+                    style={{ fontFamily: "'Cairo', sans-serif" }}
+                  >
+                    <span>المنتجات النسائية فقط</span>
+                    {isWomenOnly && <span className="text-xs">✓</span>}
+                  </button>
+                </div>
+              )}
+
               {/* Categories */}
               <div>
-                <h3 className="font-semibold text-gray-800 mb-4 text-sm" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <h3
+                  className="font-semibold text-gray-800 mb-4 text-sm"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   الفئات
                 </h3>
                 <div className="space-y-2">
-                  {categories.map((category) => (
+                  {categories.map(category => (
                     <button
                       key={category}
                       onClick={() => toggleCategory(category)}
@@ -310,28 +434,71 @@ export default function Products() {
               )}
             </div>
 
-            {/* Results Count */}
+            {/* Results Count + Sort */}
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-gray-600 text-sm" style={{ fontFamily: "'Tajawal', sans-serif" }}>
-                {isLoading ? "جاري البحث..." : `تم العثور على ${searchResults.length} منتج`}
+              <p
+                className="text-gray-600 text-sm"
+                style={{ fontFamily: "'Tajawal', sans-serif" }}
+              >
+                {isLoading
+                  ? "جاري البحث..."
+                  : `تم العثور على ${sortedResults.length} منتج`}
               </p>
-              {hasActiveFilters && !isLoading && (
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  {selectedColors.length > 0 ? `${selectedColors.length} لون محدد` : selectedSizes.length > 0 ? `${selectedSizes.length} مقاس محدد` : selectedBrands.length > 0 ? `${selectedBrands.length} براند محدد` : "فلاتر مفعّلة"}
-                </span>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <label
+                  className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
+                  <ArrowUpDown className="h-4 w-4 text-blue-600" />
+                  <span>الفرز:</span>
+                  <select
+                    value={sortBy}
+                    onChange={event =>
+                      setSortBy(event.target.value as typeof sortBy)
+                    }
+                    className="bg-transparent font-semibold outline-none"
+                    aria-label="فرز المنتجات"
+                  >
+                    <option value="newest">الأحدث</option>
+                    <option value="price-asc">السعر: من الأقل للأعلى</option>
+                    <option value="price-desc">السعر: من الأعلى للأقل</option>
+                    <option value="brand-asc">العلامة التجارية: أ-ي</option>
+                    <option value="brand-desc">العلامة التجارية: ي-أ</option>
+                  </select>
+                </label>
+                {hasActiveFilters && !isLoading && (
+                  <span
+                    className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
+                    style={{ fontFamily: "'Cairo', sans-serif" }}
+                  >
+                    {selectedColors.length > 0
+                      ? `${selectedColors.length} لون محدد`
+                      : selectedSizes.length > 0
+                        ? `${selectedSizes.length} مقاس محدد`
+                        : selectedBrands.length > 0
+                          ? `${selectedBrands.length} براند محدد`
+                          : "فلاتر مفعّلة"}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Products Grid */}
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-2xl border border-gray-100 h-80 animate-pulse" />
+                  <div
+                    key={i}
+                    className="bg-white rounded-2xl border border-gray-100 h-80 animate-pulse"
+                  />
                 ))}
               </div>
             ) : searchResults.length === 0 ? (
               <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-                <p className="text-gray-500 text-lg" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                <p
+                  className="text-gray-500 text-lg"
+                  style={{ fontFamily: "'Tajawal', sans-serif" }}
+                >
                   لم نجد منتجات تطابق معايير البحث
                 </p>
                 <button
@@ -343,18 +510,20 @@ export default function Products() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {searchResults.map((product) => (
+                {sortedResults.map(product => (
                   <Link key={product.id} href={`/product/${product.id}`}>
                     <div className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 cursor-pointer">
                       {/* Image */}
                       <div className="relative h-52 bg-gray-50 overflow-hidden">
                         <img
-                          src={product.image || ''}
+                          src={product.image || ""}
                           alt={product.name}
                           className="w-full h-full object-contain bg-[#f8f8f8] p-2 group-hover:scale-105 transition-transform duration-500"
                         />
                         {product.badge && (
-                          <div className={`absolute top-3 right-3 ${product.badgeColor || 'bg-blue-600'} text-white text-xs font-bold px-2.5 py-1 rounded-lg`}>
+                          <div
+                            className={`absolute top-3 right-3 ${product.badgeColor || "bg-blue-600"} text-white text-xs font-bold px-2.5 py-1 rounded-lg`}
+                          >
                             {product.badge}
                           </div>
                         )}
@@ -362,7 +531,10 @@ export default function Products() {
 
                       {/* Content */}
                       <div className="p-5">
-                        <div className="text-xs text-blue-600 font-semibold mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        <div
+                          className="text-xs text-blue-600 font-semibold mb-1"
+                          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                        >
                           {product.brand}
                         </div>
                         <h3
@@ -372,6 +544,24 @@ export default function Products() {
                           {product.name}
                         </h3>
 
+                        {(product.color || product.size) && (
+                          <div
+                            className="mb-3 flex flex-wrap gap-2"
+                            style={{ fontFamily: "'Cairo', sans-serif" }}
+                          >
+                            {product.color && (
+                              <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                                اللون: {product.color}
+                              </span>
+                            )}
+                            {product.size && (
+                              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                                المقاس: {product.size}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
                         {/* Rating */}
                         <div className="flex items-center gap-1.5 mb-3">
                           <div className="flex">
@@ -379,14 +569,20 @@ export default function Products() {
                               <Star
                                 key={j}
                                 className={`w-3.5 h-3.5 ${
-                                  j < Math.floor(parseFloat(product.rating as any))
+                                  j <
+                                  Math.floor(parseFloat(product.rating as any))
                                     ? "fill-amber-400 text-amber-400"
                                     : "text-gray-200"
                                 }`}
                               />
                             ))}
                           </div>
-                          <span className="text-xs text-gray-500" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                          <span
+                            className="text-xs text-gray-500"
+                            style={{
+                              fontFamily: "'Space Grotesk', sans-serif",
+                            }}
+                          >
                             {product.rating} ({product.reviewCount})
                           </span>
                         </div>
@@ -396,16 +592,26 @@ export default function Products() {
                           <div>
                             <div
                               className="text-xl font-black text-blue-600"
-                              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                              style={{
+                                fontFamily: "'Space Grotesk', sans-serif",
+                              }}
                             >
-                              {parseFloat(product.price as any).toLocaleString()} ر.س
+                              {parseFloat(
+                                product.price as any
+                              ).toLocaleString()}{" "}
+                              ر.س
                             </div>
                             {product.oldPrice && (
                               <div
                                 className="text-sm text-gray-400 line-through"
-                                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                                style={{
+                                  fontFamily: "'Space Grotesk', sans-serif",
+                                }}
                               >
-                                {parseFloat((product.oldPrice || '0') as any).toLocaleString()} ر.س
+                                {parseFloat(
+                                  (product.oldPrice || "0") as any
+                                ).toLocaleString()}{" "}
+                                ر.س
                               </div>
                             )}
                           </div>
@@ -420,19 +626,21 @@ export default function Products() {
                             </Button>
                             <Button
                               size="sm"
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.preventDefault();
                                 addProduct({
                                   id: product.id,
                                   name: product.name,
                                   brand: product.brand,
                                   price: product.price,
-                                  oldPrice: product.oldPrice ? String(product.oldPrice) : null,
-                                  image: product.image || '',
+                                  oldPrice: product.oldPrice
+                                    ? String(product.oldPrice)
+                                    : null,
+                                  image: product.image || "",
                                   rating: String(product.rating),
                                   reviewCount: product.reviewCount || 0,
                                   category: product.category,
-                                  description: product.description || '',
+                                  description: product.description || "",
                                   stock: product.stock || 0,
                                 });
                               }}
