@@ -24,17 +24,17 @@ import {
 function useScrollReveal() {
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
+            entry.target.classList.add("revealed");
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
     );
-    const elements = document.querySelectorAll('.reveal-on-scroll');
-    elements.forEach((el) => observer.observe(el));
+    const elements = document.querySelectorAll(".reveal-on-scroll");
+    elements.forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 }
@@ -76,18 +76,35 @@ import {
 } from "lucide-react";
 
 // ─── Image URLs ───────────────────────────────────────────────────────────────
-const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663786811951/JRcgdRnyZJ9kJAosaM5xmy/hero-phones-SGaT8CjQ2U74WdzKsdc8JZ.webp";
-const LOGO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663786811951/JRcgdRnyZJ9kJAosaM5xmy/logo-icon-25Ymxw43M7XJ4ot9A6W2DR.webp";
-const PRODUCTS_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663786811951/JRcgdRnyZJ9kJAosaM5xmy/products-banner-Ah5DDtn8483e8hcfHe7qZB.webp";
-const OFFER_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663786811951/JRcgdRnyZJ9kJAosaM5xmy/offer-banner-VDtaR2fGfBCPSCNWmhGF2H.webp";
-const DELIVERY_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663786811951/JRcgdRnyZJ9kJAosaM5xmy/delivery-icon-KTUVpFbdUR8S46stnPejGJ.webp";
+const HERO_IMG =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663786811951/JRcgdRnyZJ9kJAosaM5xmy/hero-phones-SGaT8CjQ2U74WdzKsdc8JZ.webp";
+const LOGO_IMG =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663786811951/JRcgdRnyZJ9kJAosaM5xmy/logo-icon-25Ymxw43M7XJ4ot9A6W2DR.webp";
+const PRODUCTS_IMG =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663786811951/JRcgdRnyZJ9kJAosaM5xmy/products-banner-Ah5DDtn8483e8hcfHe7qZB.webp";
+const OFFER_BG =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663786811951/JRcgdRnyZJ9kJAosaM5xmy/offer-banner-VDtaR2fGfBCPSCNWmhGF2H.webp";
+const DELIVERY_IMG =
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663786811951/JRcgdRnyZJ9kJAosaM5xmy/delivery-icon-KTUVpFbdUR8S46stnPejGJ.webp";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const offers = [
-  { title: "خصم 30% على الهواتف المجددة", sub: "عروض محدودة الوقت", color: "from-blue-700 to-blue-900" },
-  { title: "اشترِ لابتوب واحصل على حقيبة مجاناً", sub: "لفترة محدودة", color: "from-orange-500 to-orange-700" },
-  { title: "شحن مجاني على الطلبات فوق 500 ريال", sub: "لجميع المحافظات", color: "from-green-600 to-green-800" },
+  {
+    title: "خصم 30% على الهواتف المجددة",
+    sub: "عروض محدودة الوقت",
+    color: "from-blue-700 to-blue-900",
+  },
+  {
+    title: "اشترِ لابتوب واحصل على حقيبة مجاناً",
+    sub: "لفترة محدودة",
+    color: "from-orange-500 to-orange-700",
+  },
+  {
+    title: "شحن مجاني على الطلبات فوق 500 ريال",
+    sub: "لجميع المحافظات",
+    color: "from-green-600 to-green-800",
+  },
 ];
 
 const stats = [
@@ -128,12 +145,25 @@ const features = [
   },
 ];
 
-const paymentMethods = ["Visa", "Mastercard", "Apple Pay", "Google Pay", "مدى", "الدفع عند الاستلام", "تحويل بنكي"];
-
+const paymentMethods = [
+  "Visa",
+  "Mastercard",
+  "Apple Pay",
+  "Google Pay",
+  "مدى",
+  "الدفع عند الاستلام",
+  "تحويل بنكي",
+];
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
-function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: string; onCategoryChange: (value: string | undefined) => void }) {
+function Navbar({
+  selectedCategory,
+  onCategoryChange,
+}: {
+  selectedCategory?: string;
+  onCategoryChange: (value: string | undefined) => void;
+}) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, loading, logout } = useAuth();
@@ -175,20 +205,26 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
   const handleCategorySelect = (category?: string) => {
     onCategoryChange(category);
     if (category) {
-      document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document
+        .getElementById("products")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
   return (
     <header
-      className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
-        "bg-white/95 backdrop-blur-xl shadow-lg shadow-blue-900/5"
-      }`}
+      className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${"bg-white/95 backdrop-blur-xl shadow-lg shadow-blue-900/5"}`}
     >
       <div className="hidden bg-blue-600 text-white md:block">
-        <div className="container flex items-center justify-between py-2 text-xs" style={{ fontFamily: "'Cairo', sans-serif" }}>
+        <div
+          className="container flex items-center justify-between py-2 text-xs"
+          style={{ fontFamily: "'Cairo', sans-serif" }}
+        >
           <span>متجر أبو علي للاتصالات — تسوق بثقة</span>
-          <div className="flex items-center gap-5"><span>واتساب: 050 000 0000</span><span>الدعم متاح يومياً</span></div>
+          <div className="flex items-center gap-5">
+            <span>واتساب: 050 000 0000</span>
+            <span>الدعم متاح يومياً</span>
+          </div>
         </div>
       </div>
       <div className="container">
@@ -196,13 +232,15 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
           {/* Logo */}
           <a href="#hero" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl overflow-hidden bg-blue-600 flex items-center justify-center shadow-md group-hover:shadow-blue-500/30 transition-shadow">
-              <img src={LOGO_IMG} alt="أبو علي للاتصالات" className="w-8 h-8 object-contain" />
+              <img
+                src={LOGO_IMG}
+                alt="أبو علي للاتصالات"
+                className="w-8 h-8 object-contain"
+              />
             </div>
             <div className="leading-tight">
               <div
-                className={`font-bold text-base md:text-lg leading-none font-cairo transition-colors ${
-                  "text-gray-900"
-                }`}
+                className={`font-bold text-base md:text-lg leading-none font-cairo transition-colors ${"text-gray-900"}`}
                 style={{ fontFamily: "'Cairo', sans-serif" }}
               >
                 أبو علي للاتصالات
@@ -215,18 +253,18 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) =>
+            {navLinks.map(link =>
               link.isOfferLink ? (
                 <button
                   key={link.href}
                   type="button"
                   onClick={() => {
                     onCategoryChange("العروض");
-                    document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    document
+                      .getElementById("products")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-blue-600/10 hover:text-blue-600 ${
-                    "text-gray-700 hover:text-blue-600"
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-blue-600/10 hover:text-blue-600 ${"text-gray-700 hover:text-blue-600"}`}
                   style={{ fontFamily: "'Cairo', sans-serif" }}
                 >
                   {link.label}
@@ -235,9 +273,7 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
                 <a
                   key={link.href}
                   href={link.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-blue-600/10 hover:text-blue-600 ${
-                    "text-gray-700 hover:text-blue-600"
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-blue-600/10 hover:text-blue-600 ${"text-gray-700 hover:text-blue-600"}`}
                   style={{ fontFamily: "'Cairo', sans-serif" }}
                 >
                   {link.label}
@@ -250,21 +286,19 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
           <div className="hidden md:flex items-center gap-3">
             <a
               href="tel:+966500000000"
-              className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                "text-gray-700 hover:text-blue-600"
-              }`}
+              className={`flex items-center gap-2 text-sm font-medium transition-colors ${"text-gray-700 hover:text-blue-600"}`}
             >
               <Phone className="w-4 h-4" />
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+966 50 000 0000</span>
+              <span style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                +966 50 000 0000
+              </span>
             </a>
-                      {user ? (
+            {user ? (
               <div className="flex items-center gap-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all focus:outline-none ${
-"bg-blue-50 text-blue-700 hover:bg-blue-100"
-                      }`}
+                      className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all focus:outline-none ${"bg-blue-50 text-blue-700 hover:bg-blue-100"}`}
                       style={{ fontFamily: "'Cairo', sans-serif" }}
                     >
                       <User className="w-4 h-4" />
@@ -320,12 +354,14 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
 
           {/* Mobile Menu Toggle */}
           <button
-            className={`md:hidden p-2 rounded-lg transition-colors ${
-              "text-gray-700 hover:bg-gray-100"
-            }`}
+            className={`md:hidden p-2 rounded-lg transition-colors ${"text-gray-700 hover:bg-gray-100"}`}
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {menuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
       </div>
@@ -334,7 +370,7 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
       {menuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 shadow-xl">
           <div className="container py-4 flex flex-col gap-1">
-            {navLinks.map((link) => (
+            {navLinks.map(link => (
               <a
                 key={link.href}
                 href={link.href}
@@ -351,13 +387,18 @@ function Navbar({ selectedCategory, onCategoryChange }: { selectedCategory?: str
                 className="flex items-center gap-2 px-4 py-3 text-gray-600"
               >
                 <Phone className="w-4 h-4 text-blue-600" />
-                <span style={{ fontFamily: "'Space Grotesk', sans-serif" }}>+966 50 000 0000</span>
+                <span style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  +966 50 000 0000
+                </span>
               </a>
               {user ? (
                 <>
                   <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-blue-50 text-blue-700">
                     <User className="w-4 h-4" />
-                    <span className="text-sm font-medium" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    <span
+                      className="text-sm font-medium"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
                       أهلاً وسهلاً، {user.name || "عميل"}
                     </span>
                   </div>
@@ -442,33 +483,43 @@ function CatalogHero({
   const { data: brands = [] } = trpc.products.brands.useQuery();
   const { data: products = [] } = trpc.products.list.useQuery();
   const liveQuery = query.trim();
-  const featuredProduct = saleProducts[activeImageIndex] ?? saleProducts[0] ?? null;
-  const heroImage = featuredProduct?.image || "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1600&q=80";
+  const featuredProduct =
+    saleProducts[activeImageIndex] ?? saleProducts[0] ?? null;
+  const heroImage =
+    featuredProduct?.image ||
+    "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1600&q=80";
   const heroBrand = featuredProduct?.brand || "إلكترونيات";
   const heroCategory = featuredProduct?.category || "منتجات مميزة";
-  const heroDescription = featuredProduct?.description?.trim() || "لا يوجد وصف لهذا المنتج حاليًا.";
-  const heroPrice = featuredProduct?.price != null ? `${Number(featuredProduct.price).toLocaleString("ar-SA")} ر.س` : "السعر عند الطلب";
+  const heroDescription =
+    featuredProduct?.description?.trim() || "لا يوجد وصف لهذا المنتج حاليًا.";
+  const heroPrice =
+    featuredProduct?.price != null
+      ? `${Number(featuredProduct.price).toLocaleString("ar-SA")} ر.س`
+      : "السعر عند الطلب";
 
   useEffect(() => {
     if (saleProducts.length <= 1) return;
 
     const timer = window.setInterval(() => {
-      setActiveImageIndex((prev) => (prev + 1) % saleProducts.length);
+      setActiveImageIndex(prev => (prev + 1) % saleProducts.length);
     }, 7000);
 
     return () => window.clearInterval(timer);
   }, [saleProducts]);
-  const { data: suggestions = [], isFetching: suggestionsLoading } = trpc.products.search.useQuery(
-    { query: liveQuery, limit: 6 },
-    { enabled: searchOpen && liveQuery.length >= 2 }
-  );
+  const { data: suggestions = [], isFetching: suggestionsLoading } =
+    trpc.products.search.useQuery(
+      { query: liveQuery, limit: 6 },
+      { enabled: searchOpen && liveQuery.length >= 2 }
+    );
 
   const submitSearch = (event: React.FormEvent) => {
     event.preventDefault();
     const value = query.trim();
     onSearch(value);
     setSearchOpen(false);
-    document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById("products")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   useEffect(() => {
@@ -488,9 +539,13 @@ function CatalogHero({
 
   const topBrands = useMemo(() => {
     const list = Array.from(
-      new Set((brands ?? []).map((brand) => brand.name).filter(Boolean) as string[])
+      new Set(
+        (brands ?? []).map(brand => brand.name).filter(Boolean) as string[]
+      )
     );
-    return list.length > 0 ? list : ["Apple", "Samsung", "Xiaomi", "Nike", "Sony", "LG", "Huawei", "Dell"];
+    return list.length > 0
+      ? list
+      : ["Apple", "Samsung", "Xiaomi", "Nike", "Sony", "LG", "Huawei", "Dell"];
   }, [brands]);
 
   const brandCategoryMap = useMemo(() => {
@@ -523,7 +578,7 @@ function CatalogHero({
   const closeBrandMenu = (brand: string) => {
     clearBrandMenuTimer();
     brandMenuTimerRef.current = window.setTimeout(() => {
-      setActiveBrand((current) => (current === brand ? null : current));
+      setActiveBrand(current => (current === brand ? null : current));
     }, 120);
   };
 
@@ -531,7 +586,7 @@ function CatalogHero({
     <section id="hero" className="bg-[#f4f6fa] pb-10 pt-24 md:pt-28">
       <div className="container">
         <div className="relative z-20 mb-4 flex flex-wrap items-center justify-start gap-2 overflow-visible rounded-[18px] border border-slate-200 bg-white/90 px-2 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm">
-          {topBrands.map((brand) => {
+          {topBrands.map(brand => {
             const brandCategories = brandCategoryMap.get(brand) ?? [];
             const isActive = activeBrand === brand;
             const shouldShowMenu = isActive && brandCategories.length > 0;
@@ -546,12 +601,18 @@ function CatalogHero({
                 <button
                   type="button"
                   onFocus={() => openBrandMenu(brand)}
-                  onClick={() => setActiveBrand((current) => (current === brand ? null : brand))}
+                  onClick={() =>
+                    setActiveBrand(current =>
+                      current === brand ? null : brand
+                    )
+                  }
                   className={`flex min-w-[120px] items-center justify-between gap-2 rounded-full border px-4 py-2 text-sm font-bold transition ${selectedCategory === brand ? "border-[#f97316] bg-[#fff7ed] text-[#f97316]" : "border-[#cbd5e1] bg-[#ffffff] text-[#1f2937] hover:border-[#93c5fd] hover:bg-[#f8fbff]"}`}
                   style={{ fontFamily: "'Cairo', sans-serif" }}
                 >
                   <span>{brand}</span>
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isActive ? "rotate-180" : ""}`} />
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform ${isActive ? "rotate-180" : ""}`}
+                  />
                 </button>
 
                 {shouldShowMenu && (
@@ -560,19 +621,27 @@ function CatalogHero({
                     onMouseEnter={() => openBrandMenu(brand)}
                     onMouseLeave={() => closeBrandMenu(brand)}
                   >
-                    <div className="mb-1 px-2 pt-1 text-center text-[10px] font-bold text-slate-400" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                    <div
+                      className="mb-1 px-2 pt-1 text-center text-[10px] font-bold text-slate-400"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
                       الفئات المرتبطة
                     </div>
-                    {brandCategories.map((category) => (
+                    {brandCategories.map(category => (
                       <button
                         key={`${brand}-${category}`}
                         type="button"
-                        onMouseDown={(event) => event.preventDefault()}
+                        onMouseDown={event => event.preventDefault()}
                         onClick={() => {
                           onCategoryChange(category);
                           clearBrandMenuTimer();
                           setActiveBrand(null);
-                          document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          document
+                            .getElementById("products")
+                            ?.scrollIntoView({
+                              behavior: "smooth",
+                              block: "start",
+                            });
                         }}
                         className={`block w-full rounded-xl px-2 py-2 text-center text-sm font-medium transition ${selectedCategory === category ? "bg-[#fff7ed] text-[#f97316]" : "text-slate-800 hover:bg-[#f8fafc] hover:text-[#0f172a]"}`}
                         style={{ fontFamily: "'Cairo', sans-serif" }}
@@ -599,7 +668,7 @@ function CatalogHero({
             </div>
 
             <div className="relative z-10 px-4 py-5 md:px-8 md:py-8">
-            {/* <div className="mb-6 flex justify-end">
+              {/* <div className="mb-6 flex justify-end">
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
@@ -611,63 +680,104 @@ function CatalogHero({
               </button>
             </div> */}
 
-            <div dir="rtl" className="grid w-full gap-6 md:min-h-[420px] md:grid-cols-2 md:items-end">
-              <div className="rounded-[22px] bg-[#dbeafe] p-5 text-right md:p-6">
-                <div className="flex items-center justify-between gap-4 py-2">
-                  <span className="text-sm font-medium text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                    العلامة التجارية
-                  </span>
-                  <span className="rounded-full bg-blue-600 px-3 py-1 text-sm font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                    {heroBrand}
-                  </span>
+              <div
+                dir="rtl"
+                className="grid w-full gap-6 md:min-h-[420px] md:grid-cols-2 md:items-end"
+              >
+                <div className="rounded-[22px] bg-[#dbeafe] p-5 text-right md:p-6">
+                  <div className="flex items-center justify-between gap-4 py-2">
+                    <span
+                      className="text-sm font-medium text-slate-600"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
+                      العلامة التجارية
+                    </span>
+                    <span
+                      className="rounded-full bg-blue-600 px-3 py-1 text-sm font-bold text-white"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
+                      {heroBrand}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 py-2">
+                    <span
+                      className="text-sm font-medium text-slate-600"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
+                      الفئة
+                    </span>
+                    <span
+                      className="text-lg font-bold text-slate-900"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
+                      {heroCategory}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 py-2">
+                    <span
+                      className="text-sm font-medium text-slate-600"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
+                      اسم المنتج
+                    </span>
+                    <h2
+                      className="text-lg font-bold leading-relaxed text-blue-950"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
+                      {featuredProduct?.name || "منتج مميز"}
+                    </h2>
+                  </div>
+                  <div className="flex items-start justify-between gap-4 py-2">
+                    <span
+                      className="shrink-0 text-sm font-medium text-slate-600"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
+                      الوصف
+                    </span>
+                    <p
+                      className="max-w-[380px] text-left text-sm leading-7 text-slate-700 md:text-base"
+                      style={{ fontFamily: "'Tajawal', sans-serif" }}
+                    >
+                      {heroDescription}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 py-2">
+                    <span
+                      className="text-sm font-medium text-slate-600"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
+                      السعر
+                    </span>
+                    <span
+                      className="text-xl font-black text-blue-700"
+                      style={{ fontFamily: "'Cairo', sans-serif" }}
+                    >
+                      {heroPrice}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between gap-4 py-2">
-                  <span className="text-sm font-medium text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                    الفئة
-                  </span>
-                  <span className="text-lg font-bold text-slate-900" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                    {heroCategory}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-4 py-2">
-                  <span className="text-sm font-medium text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                    اسم المنتج
-                  </span>
-                  <h2 className="text-lg font-bold leading-relaxed text-blue-950" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                    {featuredProduct?.name || "منتج مميز"}
-                  </h2>
-                </div>
-                <div className="flex items-start justify-between gap-4 py-2">
-                  <span className="shrink-0 text-sm font-medium text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                    الوصف
-                  </span>
-                  <p className="max-w-[380px] text-left text-sm leading-7 text-slate-700 md:text-base" style={{ fontFamily: "'Tajawal', sans-serif" }}>
-                    {heroDescription}
+                <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[24px] border-0 bg-gradient-to-bl from-[#dbeafe]/80 via-[#bfdbfe]/80 to-[#93c5fd]/70 p-6 text-center shadow-none md:min-h-[280px]">
+                  <p
+                    className="max-w-[420px] text-base font-semibold leading-8 text-slate-800 md:text-lg"
+                    style={{ fontFamily: "'Tajawal', sans-serif" }}
+                  >
+                    اكتشف أحدث المنتجات والبرندات والفئات المتوفرة في متجرنا مع
+                    عروض حصرية ومواصفات قوية.
                   </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      document
+                        .getElementById("products")
+                        ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                    }
+                    className="mt-7 rounded-[18px] bg-[#f97316] px-8 py-3 text-lg font-black text-white shadow-lg shadow-orange-950/30 transition hover:bg-[#ea580c]"
+                    style={{ fontFamily: "'Cairo', sans-serif" }}
+                  >
+                    تسوق الآن
+                  </button>
                 </div>
-                <div className="flex items-center justify-between gap-4 py-2">
-                  <span className="text-sm font-medium text-slate-600" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                    السعر
-                  </span>
-                  <span className="text-xl font-black text-blue-700" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                    {heroPrice}
-                  </span>
-                </div>
-                            </div>
-              <div className="flex min-h-[220px] flex-col items-center justify-center rounded-[24px] border-0 bg-gradient-to-bl from-[#dbeafe]/80 via-[#bfdbfe]/80 to-[#93c5fd]/70 p-6 text-center shadow-none md:min-h-[280px]">
-                <p className="max-w-[420px] text-base font-semibold leading-8 text-slate-800 md:text-lg" style={{ fontFamily: "'Tajawal', sans-serif" }}>
-                  اكتشف أحدث المنتجات والبرندات والفئات المتوفرة في متجرنا مع عروض حصرية ومواصفات قوية.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                  className="mt-7 rounded-[18px] bg-[#f97316] px-8 py-3 text-lg font-black text-white shadow-lg shadow-orange-950/30 transition hover:bg-[#ea580c]"
-                  style={{ fontFamily: "'Cairo', sans-serif" }}
-                >
-                  تسوق الآن
-                </button>
               </div>
-            </div>
             </div>
           </div>
         </div>
@@ -679,15 +789,25 @@ function CatalogHero({
           role="dialog"
           aria-modal="true"
           aria-label="البحث عن المنتجات"
-          onMouseDown={(event) => {
+          onMouseDown={event => {
             if (event.target === event.currentTarget) setSearchOpen(false);
           }}
         >
           <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-white/70 bg-white shadow-2xl shadow-slate-950/25">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <div>
-                <p className="text-xs font-semibold text-[#f97316]" style={{ fontFamily: "'Cairo', sans-serif" }}>بحث سريع</p>
-                <h2 className="mt-1 text-lg font-black text-slate-900" style={{ fontFamily: "'Cairo', sans-serif" }}>ما الذي تبحث عنه؟</h2>
+                <p
+                  className="text-xs font-semibold text-[#f97316]"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
+                  بحث سريع
+                </p>
+                <h2
+                  className="mt-1 text-lg font-black text-slate-900"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
+                  ما الذي تبحث عنه؟
+                </h2>
               </div>
               <button
                 type="button"
@@ -704,13 +824,17 @@ function CatalogHero({
                 <input
                   ref={searchInputRef}
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={event => setQuery(event.target.value)}
                   placeholder="اكتب اسم المنتج أو البراند..."
                   className="h-full min-w-0 flex-1 bg-transparent px-1 text-right text-sm text-slate-800 outline-none"
                   style={{ fontFamily: "'Cairo', sans-serif" }}
                   autoComplete="off"
                 />
-                <button type="submit" className="h-full bg-[#f97316] px-6 font-bold text-white" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <button
+                  type="submit"
+                  className="h-full bg-[#f97316] px-6 font-bold text-white"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   بحث
                 </button>
               </div>
@@ -719,28 +843,56 @@ function CatalogHero({
                 <div className="mt-4 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/70">
                   {suggestionsLoading ? (
                     <div className="space-y-2 p-3">
-                      {[1, 2, 3].map((item) => <div key={item} className="h-14 animate-pulse rounded-xl bg-slate-200/70" />)}
+                      {[1, 2, 3].map(item => (
+                        <div
+                          key={item}
+                          className="h-14 animate-pulse rounded-xl bg-slate-200/70"
+                        />
+                      ))}
                     </div>
                   ) : suggestions.length > 0 ? (
                     <div className="divide-y divide-slate-100">
-                      {suggestions.map((product) => (
+                      {suggestions.map(product => (
                         <button
                           key={product.id}
                           type="button"
                           onClick={() => selectSuggestion(product)}
                           className="flex w-full items-center gap-3 px-4 py-3 text-right transition hover:bg-white"
                         >
-                          <img src={product.image || "https://via.placeholder.com/80x80?text=Product"} alt="" className="h-12 w-12 shrink-0 rounded-xl object-contain bg-[#f8f8f8] p-1" />
+                          <img
+                            src={
+                              product.image ||
+                              "https://via.placeholder.com/80x80?text=Product"
+                            }
+                            alt=""
+                            className="h-12 w-12 shrink-0 rounded-xl object-contain bg-[#f8f8f8] p-1"
+                          />
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-bold text-slate-800" style={{ fontFamily: "'Cairo', sans-serif" }}>{product.name}</span>
-                            <span className="mt-1 block truncate text-xs text-[#f97316]" style={{ fontFamily: "'Tajawal', sans-serif" }}>{product.brand || "منتج متوفر"} · {Number(product.price).toLocaleString()} ر.س</span>
+                            <span
+                              className="block truncate text-sm font-bold text-slate-800"
+                              style={{ fontFamily: "'Cairo', sans-serif" }}
+                            >
+                              {product.name}
+                            </span>
+                            <span
+                              className="mt-1 block truncate text-xs text-[#f97316]"
+                              style={{ fontFamily: "'Tajawal', sans-serif" }}
+                            >
+                              {product.brand || "منتج متوفر"} ·{" "}
+                              {Number(product.price).toLocaleString()} ر.س
+                            </span>
                           </span>
                           <ChevronLeft className="h-4 w-4 shrink-0 text-slate-300" />
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <p className="px-4 py-5 text-center text-sm text-slate-400" style={{ fontFamily: "'Tajawal', sans-serif" }}>لم نعثر على منتجات مطابقة.</p>
+                    <p
+                      className="px-4 py-5 text-center text-sm text-slate-400"
+                      style={{ fontFamily: "'Tajawal', sans-serif" }}
+                    >
+                      لم نعثر على منتجات مطابقة.
+                    </p>
                   )}
                 </div>
               )}
@@ -759,7 +911,7 @@ function HeroSection({ saleProducts }: { saleProducts: any[] }) {
     if (saleProducts.length <= 1) return;
 
     const timer = window.setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % saleProducts.length);
+      setActiveIndex(prev => (prev + 1) % saleProducts.length);
     }, 7000);
 
     return () => window.clearInterval(timer);
@@ -768,8 +920,12 @@ function HeroSection({ saleProducts }: { saleProducts: any[] }) {
   const featuredProduct = saleProducts[activeIndex] ?? saleProducts[0] ?? null;
   const image = featuredProduct?.image || HERO_IMG;
   const title = featuredProduct?.name || "أحدث العروض";
-  const description = featuredProduct?.description || "اكتشف أفضل المنتجات والعروض المميزة من متجر أبو علي للاتصالات.";
-  const price = featuredProduct ? `${Number(featuredProduct.price || 0).toLocaleString()} ر.س` : "خصم يصل إلى 50%";
+  const description =
+    featuredProduct?.description ||
+    "اكتشف أفضل المنتجات والعروض المميزة من متجر أبو علي للاتصالات.";
+  const price = featuredProduct
+    ? `${Number(featuredProduct.price || 0).toLocaleString()} ر.س`
+    : "خصم يصل إلى 50%";
 
   return (
     <section
@@ -794,8 +950,13 @@ function HeroSection({ saleProducts }: { saleProducts: any[] }) {
         <div className="max-w-2xl">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 backdrop-blur-sm">
             <Zap className="h-4 w-4 text-orange-400" />
-            <span className="text-sm font-medium text-white/90" style={{ fontFamily: "'Cairo', sans-serif" }}>
-              {featuredProduct ? "أفضل عروض اليوم" : "أكثر من 10,000 منتج في المخزون"}
+            <span
+              className="text-sm font-medium text-white/90"
+              style={{ fontFamily: "'Cairo', sans-serif" }}
+            >
+              {featuredProduct
+                ? "أفضل عروض اليوم"
+                : "أكثر من 10,000 منتج في المخزون"}
             </span>
           </div>
 
@@ -815,8 +976,18 @@ function HeroSection({ saleProducts }: { saleProducts: any[] }) {
 
           <div className="mb-10 flex flex-wrap items-center gap-4">
             <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.2)] backdrop-blur-sm">
-              <div className="text-xs text-white/70" style={{ fontFamily: "'Tajawal', sans-serif" }}>السعر</div>
-              <div className="text-2xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{price}</div>
+              <div
+                className="text-xs text-white/70"
+                style={{ fontFamily: "'Tajawal', sans-serif" }}
+              >
+                السعر
+              </div>
+              <div
+                className="text-2xl font-black text-white"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                {price}
+              </div>
             </div>
             <Button
               size="lg"
@@ -827,7 +998,6 @@ function HeroSection({ saleProducts }: { saleProducts: any[] }) {
               تسوق الآن
             </Button>
           </div>
-
         </div>
       </div>
 
@@ -850,17 +1020,52 @@ function ProductsSection({
 }) {
   const [, navigate] = useLocation();
   const { user } = useAuth();
-  const searchResult = trpc.products.search.useQuery({ query: searchQuery || undefined, limit: 24 });
-  const productList = trpc.products.list.useQuery(undefined, { enabled: !searchQuery });
-  const products = searchQuery ? (searchResult.data ?? []) : (productList.data ?? []);
-  const productsLoading = searchQuery ? searchResult.isLoading : productList.isLoading;
+  const searchResult = trpc.products.search.useQuery({
+    query: searchQuery || undefined,
+    limit: 24,
+  });
+  const productList = trpc.products.list.useQuery(undefined, {
+    enabled: !searchQuery,
+  });
+  const { data: categories = [] } = trpc.products.categories.useQuery();
+  const [sortBy, setSortBy] = useState<
+    "newest" | "price-asc" | "price-desc" | "brand-asc" | "brand-desc"
+  >("newest");
+  const products = searchQuery
+    ? (searchResult.data ?? [])
+    : (productList.data ?? []);
+  const productsLoading = searchQuery
+    ? searchResult.isLoading
+    : productList.isLoading;
+  const womenCategory = useMemo(
+    () => categories.find(category => /نسائ|نساء|women/i.test(category)),
+    [categories]
+  );
   const filteredProducts = useMemo(() => {
+    let results = products;
     if (selectedCategory === "العروض") {
-      return products.filter((product) => Boolean(product.isOnSale));
+      results = results.filter(product => Boolean(product.isOnSale));
+    } else if (selectedCategory) {
+      results = results.filter(
+        product => product.category === selectedCategory
+      );
     }
-    if (!selectedCategory) return products;
-    return products.filter((product) => product.category === selectedCategory);
-  }, [products, selectedCategory]);
+
+    return [...results].sort((a, b) => {
+      if (sortBy === "price-asc" || sortBy === "price-desc") {
+        const difference = Number(a.price) - Number(b.price);
+        return sortBy === "price-asc" ? difference : -difference;
+      }
+      if (sortBy === "brand-asc" || sortBy === "brand-desc") {
+        const difference = String(a.brand || "").localeCompare(
+          String(b.brand || ""),
+          "ar"
+        );
+        return sortBy === "brand-asc" ? difference : -difference;
+      }
+      return 0;
+    });
+  }, [products, selectedCategory, sortBy]);
 
   const addToCartMutation = trpc.cart.add.useMutation({
     onSuccess: () => {
@@ -880,7 +1085,9 @@ function ProductsSection({
     addToCartMutation.mutate({ productId, quantity: 1 });
   };
 
-  const [expandedBrands, setExpandedBrands] = useState<Record<string, boolean>>({});
+  const [expandedBrands, setExpandedBrands] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const sidebarBrands = useMemo(() => {
     const map = new Map<string, Set<string>>();
@@ -891,7 +1098,10 @@ function ProductsSection({
       if (!map.has(brand)) map.set(brand, new Set());
       if (category) map.get(brand)?.add(category);
     }
-    return Array.from(map.entries()).map(([brand, categories]) => ({ brand, categories: Array.from(categories) }));
+    return Array.from(map.entries()).map(([brand, categories]) => ({
+      brand,
+      categories: Array.from(categories),
+    }));
   }, [products]);
 
   return (
@@ -907,52 +1117,104 @@ function ProductsSection({
             </div>
           </div>
           <div className="text-right">
-            <span className="text-sm text-[#666]" style={{ fontFamily: "'Cairo', sans-serif" }}>تسوق حسب</span>
-            <h2 className="text-2xl font-black text-[#111827]" style={{ fontFamily: "'Cairo', sans-serif" }}>أحدث المنتجات</h2>
+            <span
+              className="text-sm text-[#666]"
+              style={{ fontFamily: "'Cairo', sans-serif" }}
+            >
+              تسوق حسب
+            </span>
+            <h2
+              className="text-2xl font-black text-[#111827]"
+              style={{ fontFamily: "'Cairo', sans-serif" }}
+            >
+              أحدث المنتجات
+            </h2>
           </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
           <aside className="rounded-[18px] border border-[#e7e7e7] bg-white p-4 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
-              <div className="text-lg font-black text-[#111827]" style={{ fontFamily: "'Cairo', sans-serif" }}>الأقسام</div>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#fff7ed] text-[#f97316]">+</div>
+              <div
+                className="text-lg font-black text-[#111827]"
+                style={{ fontFamily: "'Cairo', sans-serif" }}
+              >
+                الأقسام
+              </div>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#fff7ed] text-[#f97316]">
+                +
+              </div>
             </div>
+
+            {womenCategory && (
+              <button
+                type="button"
+                onClick={() =>
+                  onCategoryChange(
+                    selectedCategory === womenCategory
+                      ? undefined
+                      : womenCategory
+                  )
+                }
+                className={`mb-3 flex w-full items-center justify-between rounded-xl px-3 py-2 text-right text-sm font-bold transition ${selectedCategory === womenCategory ? "bg-[#f97316] text-white" : "bg-[#fff7ed] text-[#f97316] hover:bg-[#ffedd5]"}`}
+                style={{ fontFamily: "'Cairo', sans-serif" }}
+              >
+                <span>المنتجات النسائية فقط</span>
+                {selectedCategory === womenCategory && <span>✓</span>}
+              </button>
+            )}
 
             <div className="space-y-2">
               {sidebarBrands.map(({ brand, categories }) => {
                 const isExpanded = Boolean(expandedBrands[brand]);
                 return (
-                  <div key={brand} className="rounded-xl border border-[#f3f4f6] bg-[#fafafa]">
+                  <div
+                    key={brand}
+                    className="rounded-xl border border-[#f3f4f6] bg-[#fafafa]"
+                  >
                     <button
                       type="button"
                       onClick={() => {
                         const next = !isExpanded;
-                        setExpandedBrands((prev) => ({ ...prev, [brand]: next }));
+                        setExpandedBrands(prev => ({ ...prev, [brand]: next }));
                       }}
                       className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-right text-sm font-medium text-[#333] transition hover:bg-[#f5f5f5]"
                       style={{ fontFamily: "'Cairo', sans-serif" }}
                     >
                       <span>{brand}</span>
-                      <span className="text-[#999]">{isExpanded ? "−" : "+"}</span>
+                      <span className="text-[#999]">
+                        {isExpanded ? "−" : "+"}
+                      </span>
                     </button>
                     {isExpanded && (
                       <div className="border-t border-[#f3f4f6] px-2 py-2">
-                        {categories.length > 0 ? categories.map((category) => (
-                          <button
-                            key={`${brand}-${category}`}
-                            type="button"
-                            onClick={() => {
-                              onCategoryChange(category);
-                              document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                            }}
-                            className={`block w-full rounded-lg px-2 py-2 text-right text-xs text-[#555] transition hover:bg-[#fff7ed] hover:text-[#f97316] ${selectedCategory === category ? "bg-[#fff7ed] text-[#f97316]" : ""}`}
+                        {categories.length > 0 ? (
+                          categories.map(category => (
+                            <button
+                              key={`${brand}-${category}`}
+                              type="button"
+                              onClick={() => {
+                                onCategoryChange(category);
+                                document
+                                  .getElementById("products")
+                                  ?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "start",
+                                  });
+                              }}
+                              className={`block w-full rounded-lg px-2 py-2 text-right text-xs text-[#555] transition hover:bg-[#fff7ed] hover:text-[#f97316] ${selectedCategory === category ? "bg-[#fff7ed] text-[#f97316]" : ""}`}
+                              style={{ fontFamily: "'Cairo', sans-serif" }}
+                            >
+                              {category}
+                            </button>
+                          ))
+                        ) : (
+                          <div
+                            className="px-2 py-2 text-xs text-[#666]"
                             style={{ fontFamily: "'Cairo', sans-serif" }}
                           >
-                            {category}
-                          </button>
-                        )) : (
-                          <div className="px-2 py-2 text-xs text-[#666]" style={{ fontFamily: "'Cairo', sans-serif" }}>لا توجد فئات مرتبطة</div>
+                            لا توجد فئات مرتبطة
+                          </div>
                         )}
                       </div>
                     )}
@@ -964,24 +1226,49 @@ function ProductsSection({
 
           <div>
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
-                <button type="button" className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  الفرز: الافتراضي
-                </button>
-                <button type="button" className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]" style={{ fontFamily: "'Cairo', sans-serif" }}>
-                  السعر
-                </button>
+              <div className="flex flex-wrap items-center gap-3">
+                <label
+                  className="flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
+                  <span>الفرز:</span>
+                  <select
+                    value={sortBy}
+                    onChange={event =>
+                      setSortBy(event.target.value as typeof sortBy)
+                    }
+                    className="bg-transparent font-semibold outline-none"
+                    aria-label="فرز المنتجات"
+                  >
+                    <option value="newest">الافتراضي</option>
+                    <option value="price-asc">السعر: من الأقل للأعلى</option>
+                    <option value="price-desc">السعر: من الأعلى للأقل</option>
+                    <option value="brand-asc">العلامة التجارية: أ-ي</option>
+                    <option value="brand-desc">العلامة التجارية: ي-أ</option>
+                  </select>
+                </label>
               </div>
-              <div className="flex items-center gap-2 text-sm text-[#666]" style={{ fontFamily: "'Cairo', sans-serif" }}>
+              <div
+                className="flex items-center gap-2 text-sm text-[#666]"
+                style={{ fontFamily: "'Cairo', sans-serif" }}
+              >
                 <span>{selectedCategory === "العروض" ? "عروض" : "عرض"}</span>
-                <span className="rounded-lg bg-white px-2 py-1">{filteredProducts.length}</span>
+                <span className="rounded-lg bg-white px-2 py-1">
+                  {filteredProducts.length}
+                </span>
               </div>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {((productsLoading ? Array.from({ length: 6 }) : filteredProducts) as any[]).map((product: any, i: number) => {
+              {(
+                (productsLoading
+                  ? Array.from({ length: 6 })
+                  : filteredProducts) as any[]
+              ).map((product: any, i: number) => {
                 const isPlaceholder = productsLoading;
-                const ratingValue = isPlaceholder ? 0 : Math.floor(Number(product.rating) || 0);
+                const ratingValue = isPlaceholder
+                  ? 0
+                  : Math.floor(Number(product.rating) || 0);
                 return (
                   <div
                     key={isPlaceholder ? `loading-${i}` : product.id}
@@ -992,10 +1279,21 @@ function ProductsSection({
                       {isPlaceholder ? (
                         <div className="h-full w-full animate-pulse bg-gray-200" />
                       ) : (
-                        <img src={product.image || "https://via.placeholder.com/400x300?text=Product"} alt={product.name} className="h-full w-full object-contain bg-[#f8f8f8] p-2 transition duration-500 group-hover:scale-105" />
+                        <img
+                          src={
+                            product.image ||
+                            "https://via.placeholder.com/400x300?text=Product"
+                          }
+                          alt={product.name}
+                          className="h-full w-full object-contain bg-[#f8f8f8] p-2 transition duration-500 group-hover:scale-105"
+                        />
                       )}
                       {!isPlaceholder && product.badge && (
-                        <span className={`absolute right-3 top-3 rounded-full px-2 py-1 text-xs font-bold text-white ${product.badgeColor || "bg-[#f97316]"}`}>{product.badge}</span>
+                        <span
+                          className={`absolute right-3 top-3 rounded-full px-2 py-1 text-xs font-bold text-white ${product.badgeColor || "bg-[#f97316]"}`}
+                        >
+                          {product.badge}
+                        </span>
                       )}
                       <button className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-[#444] shadow-sm">
                         <Star className="h-4 w-4" />
@@ -1003,42 +1301,93 @@ function ProductsSection({
                     </div>
 
                     <div className="p-4">
-                      <div className="mb-2 text-xs font-semibold text-[#8b5cf6]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      <div
+                        className="mb-2 text-xs font-semibold text-[#8b5cf6]"
+                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                      >
                         {isPlaceholder ? "..." : product.brand}
                       </div>
                       {!isPlaceholder && product.description && (
-                        <p className="mb-2 line-clamp-2 text-xs leading-5 text-[#666]" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                        <p
+                          className="mb-2 line-clamp-2 text-xs leading-5 text-[#666]"
+                          style={{ fontFamily: "'Tajawal', sans-serif" }}
+                        >
                           {product.description}
                         </p>
                       )}
-                      <h3 className="mb-2 min-h-[48px] text-base font-bold leading-6 text-[#111827]" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                      <h3
+                        className="mb-2 min-h-[48px] text-base font-bold leading-6 text-[#111827]"
+                        style={{ fontFamily: "'Cairo', sans-serif" }}
+                      >
                         {isPlaceholder ? "..." : product.name}
                       </h3>
 
+                      {!isPlaceholder && (product.color || product.size) && (
+                        <div
+                          className="mb-3 flex flex-wrap gap-2"
+                          style={{ fontFamily: "'Cairo', sans-serif" }}
+                        >
+                          {product.color && (
+                            <span className="rounded-full bg-[#eff6ff] px-2.5 py-1 text-xs font-medium text-[#2563eb]">
+                              اللون: {product.color}
+                            </span>
+                          )}
+                          {product.size && (
+                            <span className="rounded-full bg-[#f3f4f6] px-2.5 py-1 text-xs font-medium text-[#4b5563]">
+                              المقاس: {product.size}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
                       <div className="mb-3 flex items-center gap-1.5">
                         {[...Array(5)].map((_, j) => (
-                          <Star key={j} className={`h-3.5 w-3.5 ${j < ratingValue ? "fill-[#fbbf24] text-[#fbbf24]" : "text-[#d1d5db]"}`} />
+                          <Star
+                            key={j}
+                            className={`h-3.5 w-3.5 ${j < ratingValue ? "fill-[#fbbf24] text-[#fbbf24]" : "text-[#d1d5db]"}`}
+                          />
                         ))}
-                        <span className="text-xs text-[#666]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                          {isPlaceholder ? "..." : `${Number(product.rating || 0).toFixed(1)} (${product.reviewCount ?? 0})`}
+                        <span
+                          className="text-xs text-[#666]"
+                          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                        >
+                          {isPlaceholder
+                            ? "..."
+                            : `${Number(product.rating || 0).toFixed(1)} (${product.reviewCount ?? 0})`}
                         </span>
                       </div>
 
                       <div className="flex items-end justify-between gap-3">
                         <div>
-                          <div className="text-xl font-black text-[#111827]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                            {isPlaceholder ? "..." : `${Number(product.price).toLocaleString()} ر.س`}
+                          <div
+                            className="text-xl font-black text-[#111827]"
+                            style={{
+                              fontFamily: "'Space Grotesk', sans-serif",
+                            }}
+                          >
+                            {isPlaceholder
+                              ? "..."
+                              : `${Number(product.price).toLocaleString()} ر.س`}
                           </div>
                           {!isPlaceholder && product.oldPrice && (
-                            <div className="text-xs text-[#9ca3af] line-through" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                            <div
+                              className="text-xs text-[#9ca3af] line-through"
+                              style={{
+                                fontFamily: "'Space Grotesk', sans-serif",
+                              }}
+                            >
                               {`${Number(product.oldPrice).toLocaleString()} ر.س`}
                             </div>
                           )}
                         </div>
                         <Button
                           size="sm"
-                          onClick={() => !isPlaceholder && handleAddToCart(product.id)}
-                          disabled={addToCartMutation.isPending || isPlaceholder}
+                          onClick={() =>
+                            !isPlaceholder && handleAddToCart(product.id)
+                          }
+                          disabled={
+                            addToCartMutation.isPending || isPlaceholder
+                          }
                           className="rounded-xl bg-[#f97316] px-3 text-white hover:bg-[#ea580c] disabled:opacity-50"
                           style={{ fontFamily: "'Cairo', sans-serif" }}
                         >
@@ -1063,13 +1412,20 @@ function OffersSection() {
     <section id="offers" className="py-16 md:py-24 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0">
-        <img src={OFFER_BG} alt="" className="w-full h-full object-cover opacity-90" />
+        <img
+          src={OFFER_BG}
+          alt=""
+          className="w-full h-full object-cover opacity-90"
+        />
         <div className="absolute inset-0 bg-[#0D1B2A]/75" />
       </div>
 
       <div className="container relative z-10">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-full px-4 py-1.5 text-sm font-medium mb-4" style={{ fontFamily: "'Cairo', sans-serif" }}>
+          <div
+            className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-full px-4 py-1.5 text-sm font-medium mb-4"
+            style={{ fontFamily: "'Cairo', sans-serif" }}
+          >
             <Zap className="w-4 h-4" />
             عروض حصرية
           </div>
@@ -1079,7 +1435,10 @@ function OffersSection() {
           >
             لا تفوّت هذه العروض!
           </h2>
-          <p className="text-gray-400 mt-2" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+          <p
+            className="text-gray-400 mt-2"
+            style={{ fontFamily: "'Tajawal', sans-serif" }}
+          >
             عروض محدودة الوقت — اغتنم الفرصة قبل انتهائها
           </p>
         </div>
@@ -1091,7 +1450,10 @@ function OffersSection() {
               className={`bg-gradient-to-br ${offer.color} rounded-2xl p-6 border border-white/10 hover:scale-105 transition-transform duration-200 cursor-pointer animate-fade-in-up`}
               style={{ animationDelay: `${i * 100}ms` }}
             >
-              <div className="text-white/70 text-sm mb-2" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+              <div
+                className="text-white/70 text-sm mb-2"
+                style={{ fontFamily: "'Tajawal', sans-serif" }}
+              >
                 {offer.sub}
               </div>
               <h3
@@ -1129,7 +1491,10 @@ function FeaturesSection() {
     <section className="py-16 md:py-24 bg-[#F4F6FA]">
       <div className="container">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 rounded-full px-4 py-1.5 text-sm font-medium mb-4" style={{ fontFamily: "'Cairo', sans-serif" }}>
+          <div
+            className="inline-flex items-center gap-2 bg-green-100 text-green-700 rounded-full px-4 py-1.5 text-sm font-medium mb-4"
+            style={{ fontFamily: "'Cairo', sans-serif" }}
+          >
             <Award className="w-4 h-4" />
             لماذا أبو علي؟
           </div>
@@ -1150,7 +1515,9 @@ function FeaturesSection() {
                 className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-200 animate-fade-in-up group"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <div className={`w-12 h-12 ${feat.bg} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                <div
+                  className={`w-12 h-12 ${feat.bg} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+                >
                   <Icon className={`w-6 h-6 ${feat.color}`} />
                 </div>
                 <h3
@@ -1159,7 +1526,10 @@ function FeaturesSection() {
                 >
                   {feat.title}
                 </h3>
-                <p className="text-sm text-gray-500 leading-relaxed" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                <p
+                  className="text-sm text-gray-500 leading-relaxed"
+                  style={{ fontFamily: "'Tajawal', sans-serif" }}
+                >
                   {feat.desc}
                 </p>
               </div>
@@ -1171,7 +1541,10 @@ function FeaturesSection() {
         <div className="mt-16 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="grid md:grid-cols-2 gap-0">
             <div className="p-8 md:p-12 flex flex-col justify-center">
-              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 rounded-full px-4 py-1.5 text-sm font-medium mb-6 w-fit" style={{ fontFamily: "'Cairo', sans-serif" }}>
+              <div
+                className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 rounded-full px-4 py-1.5 text-sm font-medium mb-6 w-fit"
+                style={{ fontFamily: "'Cairo', sans-serif" }}
+              >
                 <Truck className="w-4 h-4" />
                 التوصيل السريع
               </div>
@@ -1192,7 +1565,10 @@ function FeaturesSection() {
                 ].map((item, j) => (
                   <li key={j} className="flex items-center gap-3">
                     <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-gray-600 text-sm" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                    <span
+                      className="text-gray-600 text-sm"
+                      style={{ fontFamily: "'Tajawal', sans-serif" }}
+                    >
                       {item}
                     </span>
                   </li>
@@ -1232,7 +1608,10 @@ function PaymentSection() {
             >
               وسائل الدفع المتاحة
             </h3>
-            <p className="text-sm text-gray-500" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+            <p
+              className="text-sm text-gray-500"
+              style={{ fontFamily: "'Tajawal', sans-serif" }}
+            >
               ادفع بالطريقة التي تناسبك — آمن ومشفر 100%
             </p>
           </div>
@@ -1261,7 +1640,10 @@ function CTASection() {
       <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full bg-orange-500/20 blur-3xl translate-x-1/2 translate-y-1/2" />
 
       <div className="container relative z-10 text-center">
-        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white rounded-full px-4 py-1.5 text-sm font-medium mb-6" style={{ fontFamily: "'Cairo', sans-serif" }}>
+        <div
+          className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white rounded-full px-4 py-1.5 text-sm font-medium mb-6"
+          style={{ fontFamily: "'Cairo', sans-serif" }}
+        >
           <MessageCircle className="w-4 h-4" />
           تواصل معنا عبر واتساب
         </div>
@@ -1277,8 +1659,8 @@ function CTASection() {
           className="text-gray-300 text-lg mb-10 max-w-xl mx-auto"
           style={{ fontFamily: "'Tajawal', sans-serif" }}
         >
-          فريقنا المتخصص يستقبل استفساراتك على مدار الساعة.
-          احصل على أفضل عرض لما تحتاجه الآن.
+          فريقنا المتخصص يستقبل استفساراتك على مدار الساعة. احصل على أفضل عرض
+          لما تحتاجه الآن.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
@@ -1321,7 +1703,10 @@ function ContactSection() {
         <div className="grid md:grid-cols-2 gap-12 items-start">
           {/* Info */}
           <div>
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 rounded-full px-4 py-1.5 text-sm font-medium mb-6" style={{ fontFamily: "'Cairo', sans-serif" }}>
+            <div
+              className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 rounded-full px-4 py-1.5 text-sm font-medium mb-6"
+              style={{ fontFamily: "'Cairo', sans-serif" }}
+            >
               <Phone className="w-4 h-4" />
               تواصل معنا
             </div>
@@ -1337,16 +1722,36 @@ function ContactSection() {
               className="text-gray-500 mb-8 leading-relaxed"
               style={{ fontFamily: "'Tajawal', sans-serif" }}
             >
-              هل لديك استفسار؟ تريد معرفة سعر منتج معين؟ أو تحتاج مساعدة في اختيار الجهاز المناسب؟
-              فريقنا جاهز لمساعدتك.
+              هل لديك استفسار؟ تريد معرفة سعر منتج معين؟ أو تحتاج مساعدة في
+              اختيار الجهاز المناسب؟ فريقنا جاهز لمساعدتك.
             </p>
 
             <div className="space-y-4">
               {[
-                { icon: Phone, label: "الهاتف", value: "+966 50 000 0000", href: "tel:+966500000000" },
-                { icon: MessageCircle, label: "واتساب", value: "+966 50 000 0000", href: "https://wa.me/966500000000" },
-                { icon: Mail, label: "البريد الإلكتروني", value: "info@abuali-telecom.com", href: "mailto:info@abuali-telecom.com" },
-                { icon: MapPin, label: "العنوان", value: "الرياض، المملكة العربية السعودية", href: "#" },
+                {
+                  icon: Phone,
+                  label: "الهاتف",
+                  value: "+966 50 000 0000",
+                  href: "tel:+966500000000",
+                },
+                {
+                  icon: MessageCircle,
+                  label: "واتساب",
+                  value: "+966 50 000 0000",
+                  href: "https://wa.me/966500000000",
+                },
+                {
+                  icon: Mail,
+                  label: "البريد الإلكتروني",
+                  value: "info@abuali-telecom.com",
+                  href: "mailto:info@abuali-telecom.com",
+                },
+                {
+                  icon: MapPin,
+                  label: "العنوان",
+                  value: "الرياض، المملكة العربية السعودية",
+                  href: "#",
+                },
               ].map((item, i) => {
                 const Icon = item.icon;
                 return (
@@ -1359,10 +1764,16 @@ function ContactSection() {
                       <Icon className="w-5 h-5 text-blue-600 group-hover:text-white transition-colors" />
                     </div>
                     <div>
-                      <div className="text-xs text-gray-400 mb-0.5" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                      <div
+                        className="text-xs text-gray-400 mb-0.5"
+                        style={{ fontFamily: "'Cairo', sans-serif" }}
+                      >
                         {item.label}
                       </div>
-                      <div className="font-semibold text-gray-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      <div
+                        className="font-semibold text-gray-800"
+                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                      >
                         {item.value}
                       </div>
                     </div>
@@ -1383,10 +1794,16 @@ function ContactSection() {
             {sent ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
-                <h4 className="text-lg font-bold text-gray-900 mb-2" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <h4
+                  className="text-lg font-bold text-gray-900 mb-2"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   تم إرسال رسالتك بنجاح!
                 </h4>
-                <p className="text-gray-500 text-sm" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+                <p
+                  className="text-gray-500 text-sm"
+                  style={{ fontFamily: "'Tajawal', sans-serif" }}
+                >
                   سنتواصل معك في أقرب وقت ممكن
                 </p>
               </div>
@@ -1403,7 +1820,7 @@ function ContactSection() {
                     type="text"
                     required
                     value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    onChange={e => setForm({ ...form, name: e.target.value })}
                     placeholder="أدخل اسمك الكامل"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-gray-800 bg-gray-50"
                     style={{ fontFamily: "'Tajawal', sans-serif" }}
@@ -1420,10 +1837,14 @@ function ContactSection() {
                     type="tel"
                     required
                     value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    onChange={e => setForm({ ...form, phone: e.target.value })}
                     placeholder="+966 5X XXX XXXX"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-gray-800 bg-gray-50"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif", direction: "ltr", textAlign: "right" }}
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      direction: "ltr",
+                      textAlign: "right",
+                    }}
                   />
                 </div>
                 <div>
@@ -1437,7 +1858,9 @@ function ContactSection() {
                     required
                     rows={4}
                     value={form.message}
-                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                    onChange={e =>
+                      setForm({ ...form, message: e.target.value })
+                    }
                     placeholder="اكتب استفسارك أو طلبك هنا..."
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-gray-800 bg-gray-50 resize-none"
                     style={{ fontFamily: "'Tajawal', sans-serif" }}
@@ -1469,21 +1892,30 @@ function Footer() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
-                <img src={LOGO_IMG} alt="أبو علي للاتصالات" className="w-8 h-8 object-contain" />
+                <img
+                  src={LOGO_IMG}
+                  alt="أبو علي للاتصالات"
+                  className="w-8 h-8 object-contain"
+                />
               </div>
               <div>
-                <div className="font-black text-lg" style={{ fontFamily: "'Cairo', sans-serif" }}>
+                <div
+                  className="font-black text-lg"
+                  style={{ fontFamily: "'Cairo', sans-serif" }}
+                >
                   أبو علي للاتصالات
                 </div>
-                <div className="text-xs text-blue-400">وجهتك الأولى للتقنية</div>
+                <div className="text-xs text-blue-400">
+                  وجهتك الأولى للتقنية
+                </div>
               </div>
             </div>
             <p
               className="text-gray-400 text-sm leading-relaxed mb-6 max-w-sm"
               style={{ fontFamily: "'Tajawal', sans-serif" }}
             >
-              متجرك المتخصص في الهواتف الذكية، اللابتوبات، الإكسسوارات وقطع الغيار.
-              خبرة تتجاوز 15 عاماً في خدمة عملائنا الكرام.
+              متجرك المتخصص في الهواتف الذكية، اللابتوبات، الإكسسوارات وقطع
+              الغيار. خبرة تتجاوز 15 عاماً في خدمة عملائنا الكرام.
             </p>
             <div className="flex gap-3">
               {[
@@ -1512,19 +1944,24 @@ function Footer() {
               روابط سريعة
             </h4>
             <ul className="space-y-2">
-              {["الصفحة الرئيسية", "المنتجات", "العروض والتخفيضات", "من نحن", "سياسة الخصوصية", "الشروط والأحكام"].map(
-                (link, i) => (
-                  <li key={i}>
-                    <a
-                      href="#"
-                      className="text-gray-400 hover:text-white text-sm transition-colors"
-                      style={{ fontFamily: "'Cairo', sans-serif" }}
-                    >
-                      {link}
-                    </a>
-                  </li>
-                )
-              )}
+              {[
+                "الصفحة الرئيسية",
+                "المنتجات",
+                "العروض والتخفيضات",
+                "من نحن",
+                "سياسة الخصوصية",
+                "الشروط والأحكام",
+              ].map((link, i) => (
+                <li key={i}>
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white text-sm transition-colors"
+                    style={{ fontFamily: "'Cairo', sans-serif" }}
+                  >
+                    {link}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -1546,7 +1983,12 @@ function Footer() {
                   <Icon className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
                   <span
                     className="text-gray-400 text-sm"
-                    style={{ fontFamily: i === 0 ? "'Space Grotesk', sans-serif" : "'Tajawal', sans-serif" }}
+                    style={{
+                      fontFamily:
+                        i === 0
+                          ? "'Space Grotesk', sans-serif"
+                          : "'Tajawal', sans-serif",
+                    }}
                   >
                     {text}
                   </span>
@@ -1566,7 +2008,10 @@ function Footer() {
           </p>
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-green-500" />
-            <span className="text-gray-500 text-xs" style={{ fontFamily: "'Tajawal', sans-serif" }}>
+            <span
+              className="text-gray-500 text-xs"
+              style={{ fontFamily: "'Tajawal', sans-serif" }}
+            >
               موقع آمن ومشفر بـ SSL
             </span>
           </div>
@@ -1581,8 +2026,8 @@ function WhatsAppButton() {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 300);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
   return (
     <a
@@ -1590,7 +2035,9 @@ function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       className={`fixed bottom-6 left-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-green-500/40 transition-all duration-300 animate-pulse-ring ${
-        visible ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
+        visible
+          ? "opacity-100 scale-100"
+          : "opacity-0 scale-90 pointer-events-none"
       }`}
       title="تواصل عبر واتساب"
     >
@@ -1602,20 +2049,31 @@ function WhatsAppButton() {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function () {
   useScrollReveal();
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
+  const [selectedCategory, setSelectedCategory] = useState<
+    string | undefined
+  >();
   const [searchQuery, setSearchQuery] = useState("");
   const { data: products = [] } = trpc.products.list.useQuery();
 
   return (
     <div className="min-h-screen" dir="rtl">
-      <Navbar selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
+      <Navbar
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+      />
       <CatalogHero
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
         onSearch={setSearchQuery}
-        saleProducts={products.filter((product: any) => Boolean(product.isOnSale))}
+        saleProducts={products.filter((product: any) =>
+          Boolean(product.isOnSale)
+        )}
       />
-      <ProductsSection selectedCategory={selectedCategory} searchQuery={searchQuery} onCategoryChange={setSelectedCategory} />
+      <ProductsSection
+        selectedCategory={selectedCategory}
+        searchQuery={searchQuery}
+        onCategoryChange={setSelectedCategory}
+      />
       <PaymentSection />
       <CTASection />
       <ContactSection />
