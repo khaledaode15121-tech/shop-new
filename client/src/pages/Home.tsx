@@ -1030,6 +1030,8 @@ function ProductsSection({
     "newest" | "price-asc" | "price-desc" | "brand-asc" | "brand-desc"
   >("newest");
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>();
+  const [selectedColor, setSelectedColor] = useState<string | undefined>();
+  const [selectedSize, setSelectedSize] = useState<string | undefined>();
   const products = searchQuery
     ? (searchResult.data ?? [])
     : (productList.data ?? []);
@@ -1047,6 +1049,20 @@ function ProductsSection({
       ).sort((a, b) => String(a).localeCompare(String(b), "ar")),
     [products]
   );
+  const colorOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(products.map(product => product.color?.trim()).filter(Boolean))
+      ).sort((a, b) => String(a).localeCompare(String(b), "ar")),
+    [products]
+  );
+  const sizeOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(products.map(product => product.size?.trim()).filter(Boolean))
+      ).sort((a, b) => String(a).localeCompare(String(b), "ar")),
+    [products]
+  );
   const filteredProducts = useMemo(() => {
     let results = products;
     if (selectedCategory === "العروض") {
@@ -1058,6 +1074,12 @@ function ProductsSection({
     }
     if (selectedBrand) {
       results = results.filter(product => product.brand === selectedBrand);
+    }
+    if (selectedColor) {
+      results = results.filter(product => product.color === selectedColor);
+    }
+    if (selectedSize) {
+      results = results.filter(product => product.size === selectedSize);
     }
 
     return [...results].sort((a, b) => {
@@ -1074,7 +1096,14 @@ function ProductsSection({
       }
       return 0;
     });
-  }, [products, selectedCategory, selectedBrand, sortBy]);
+  }, [
+    products,
+    selectedCategory,
+    selectedBrand,
+    selectedColor,
+    selectedSize,
+    sortBy,
+  ]);
 
   const addToCartMutation = trpc.cart.add.useMutation({
     onSuccess: () => {
@@ -1257,6 +1286,52 @@ function ProductsSection({
                     ))}
                   </select>
                 </label>
+                {colorOptions.length > 0 && (
+                  <label
+                    className="flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]"
+                    style={{ fontFamily: "'Cairo', sans-serif'" }}
+                  >
+                    <span>اللون:</span>
+                    <select
+                      value={selectedColor ?? ""}
+                      onChange={event =>
+                        setSelectedColor(event.target.value || undefined)
+                      }
+                      className="max-w-[150px] bg-transparent font-semibold outline-none"
+                      aria-label="التصفية حسب اللون"
+                    >
+                      <option value="">كل الألوان</option>
+                      {colorOptions.map(color => (
+                        <option key={color} value={color}>
+                          {color}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {sizeOptions.length > 0 && (
+                  <label
+                    className="flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]"
+                    style={{ fontFamily: "'Cairo', sans-serif'" }}
+                  >
+                    <span>المقاس:</span>
+                    <select
+                      value={selectedSize ?? ""}
+                      onChange={event =>
+                        setSelectedSize(event.target.value || undefined)
+                      }
+                      className="max-w-[150px] bg-transparent font-semibold outline-none"
+                      aria-label="التصفية حسب المقاس"
+                    >
+                      <option value="">كل المقاسات</option>
+                      {sizeOptions.map(size => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
                 <label
                   className="flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]"
                   style={{ fontFamily: "'Cairo', sans-serif" }}
@@ -1281,6 +1356,8 @@ function ProductsSection({
                   type="button"
                   onClick={() => {
                     setSelectedBrand(undefined);
+                    setSelectedColor(undefined);
+                    setSelectedSize(undefined);
                     setSortBy("newest");
                     onCategoryChange(undefined);
                   }}
