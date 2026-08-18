@@ -1,320 +1,107 @@
-import { drizzle } from "drizzle-orm/mysql2";
-import { products } from "./drizzle/schema.ts";
 import mysql from "mysql2/promise";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
 if (!DATABASE_URL) {
-  console.error("DATABASE_URL is not set");
+  console.error("DATABASE_URL is not set. Set it before running the seed script.");
   process.exit(1);
 }
 
-const seedProducts = [
-  {
-    name: "iPhone 15 Pro Max",
-    brand: "Apple",
-    category: "هواتف ذكية",
-    description: "أحدث هاتف من Apple بمعالج A17 Pro وكاميرا ثلاثية متقدمة وشاشة Super Retina XDR",
-    price: "4999.00",
-    oldPrice: "5499.00",
-    image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500&q=80",
-      "https://images.unsplash.com/photo-1592286927505-1def25e63e67?w=500&q=80",
-    ],
-    rating: "4.9",
-    reviewCount: 128,
-    stock: 50,
-    badge: "الأكثر مبيعاً",
-    badgeColor: "bg-blue-600",
-  },
-  {
-    name: "Samsung Galaxy S24 Ultra",
-    brand: "Samsung",
-    category: "هواتف ذكية",
-    description: "هاتف رائد من Samsung بمعالج Snapdragon 8 Gen 3 وكاميرا 200 ميجابكسل",
-    price: "4299.00",
-    oldPrice: "4799.00",
-    image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&q=80",
-      "https://images.unsplash.com/photo-1511707267537-b85faf00021e?w=500&q=80",
-    ],
-    rating: "4.8",
-    reviewCount: 95,
-    stock: 45,
-    badge: "جديد",
-    badgeColor: "bg-green-600",
-  },
-  {
-    name: "MacBook Pro M3",
-    brand: "Apple",
-    category: "لابتوبات",
-    description: "لابتوب احترافي بمعالج Apple M3 وشاشة Retina وبطارية تدوم 18 ساعة",
-    price: "7999.00",
-    oldPrice: null,
-    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80",
-      "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&q=80",
-    ],
-    rating: "4.9",
-    reviewCount: 64,
-    stock: 20,
-    badge: "مميز",
-    badgeColor: "bg-purple-600",
-  },
-  {
-    name: "AirPods Pro 2",
-    brand: "Apple",
-    category: "سماعات",
-    description: "سماعات لاسلكية بتقنية إلغاء الضوضاء النشطة وجودة صوت استثنائية",
-    price: "899.00",
-    oldPrice: "1099.00",
-    image: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=500&q=80",
-      "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=500&q=80",
-    ],
-    rating: "4.7",
-    reviewCount: 210,
-    stock: 100,
-    badge: "خصم 18%",
-    badgeColor: "bg-orange-500",
-  },
-  {
-    name: "Apple Watch Series 9",
-    brand: "Apple",
-    category: "ساعات ذكية",
-    description: "ساعة ذكية بشاشة Always-On وميزات صحية متقدمة وتصميم أنيق",
-    price: "1599.00",
-    oldPrice: "1799.00",
-    image: "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=500&q=80",
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80",
-    ],
-    rating: "4.8",
-    reviewCount: 87,
-    stock: 35,
-    badge: "عرض محدود",
-    badgeColor: "bg-red-500",
-  },
-  {
-    name: "Samsung Galaxy Tab S9",
-    brand: "Samsung",
-    category: "لابتوبات",
-    description: "تابلت قوي بشاشة AMOLED وقلم S Pen ومعالج Snapdragon 8 Gen 2",
-    price: "2799.00",
-    oldPrice: "3199.00",
-    image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500&q=80",
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&q=80",
-    ],
-    rating: "4.6",
-    reviewCount: 53,
-    stock: 25,
-    badge: "خصم 12%",
-    badgeColor: "bg-orange-500",
-  },
-  {
-    name: "Sony WH-1000XM5",
-    brand: "Sony",
-    category: "سماعات",
-    description: "سماعات رأس احترافية بأفضل تقنية إلغاء ضوضاء وصوت عالي الجودة",
-    price: "2299.00",
-    oldPrice: "2699.00",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
-      "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=500&q=80",
-    ],
-    rating: "4.8",
-    reviewCount: 142,
-    stock: 40,
-    badge: "الأفضل",
-    badgeColor: "bg-indigo-600",
-  },
-  {
-    name: "Dell XPS 15",
-    brand: "Dell",
-    category: "لابتوبات",
-    description: "لابتوب عالي الأداء بمعالج Intel Core i9 وكرت رسوميات RTX 4070",
-    price: "6499.00",
-    oldPrice: null,
-    image: "https://images.unsplash.com/photo-1588872657840-790ff3bde08c?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1588872657840-790ff3bde08c?w=500&q=80",
-      "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&q=80",
-    ],
-    rating: "4.7",
-    reviewCount: 78,
-    stock: 15,
-    badge: "قوي",
-    badgeColor: "bg-red-600",
-  },
-  {
-    name: "Google Pixel 8 Pro",
-    brand: "Google",
-    category: "هواتف ذكية",
-    description: "هاتف ذكي بمعالج Tensor G3 وكاميرا بتقنية AI متقدمة",
-    price: "3799.00",
-    oldPrice: "4199.00",
-    image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500&q=80",
-      "https://images.unsplash.com/photo-1511707267537-b85faf00021e?w=500&q=80",
-    ],
-    rating: "4.6",
-    reviewCount: 65,
-    stock: 30,
-    badge: "ذكي",
-    badgeColor: "bg-blue-500",
-  },
-  {
-    name: "Xiaomi 13 Ultra",
-    brand: "Xiaomi",
-    category: "هواتف ذكية",
-    description: "هاتف بكاميرا احترافية بتعاون مع Leica ومعالج Snapdragon 8 Gen 2",
-    price: "2899.00",
-    oldPrice: "3299.00",
-    image: "https://images.unsplash.com/photo-1511707267537-b85faf00021e?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1511707267537-b85faf00021e?w=500&q=80",
-      "https://images.unsplash.com/photo-1592286927505-1def25e63e67?w=500&q=80",
-    ],
-    rating: "4.5",
-    reviewCount: 45,
-    stock: 28,
-    badge: "عرض",
-    badgeColor: "bg-yellow-600",
-  },
-  {
-    name: "OnePlus 12",
-    brand: "OnePlus",
-    category: "هواتف ذكية",
-    description: "هاتف سريع بمعالج Snapdragon 8 Gen 3 وشحن سريع 100W",
-    price: "2499.00",
-    oldPrice: "2899.00",
-    image: "https://images.unsplash.com/photo-1592286927505-1def25e63e67?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1592286927505-1def25e63e67?w=500&q=80",
-      "https://images.unsplash.com/photo-1511707267537-b85faf00021e?w=500&q=80",
-    ],
-    rating: "4.6",
-    reviewCount: 72,
-    stock: 32,
-    badge: "سريع",
-    badgeColor: "bg-green-600",
-  },
-  {
-    name: "iPad Pro 12.9",
-    brand: "Apple",
-    category: "لابتوبات",
-    description: "تابلت احترافي بمعالج M2 وشاشة Liquid Retina XDR",
-    price: "3999.00",
-    oldPrice: null,
-    image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&q=80",
-      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500&q=80",
-    ],
-    rating: "4.8",
-    reviewCount: 91,
-    stock: 22,
-    badge: "احترافي",
-    badgeColor: "bg-purple-600",
-  },
-  {
-    name: "Beats Studio Pro",
-    brand: "Beats",
-    category: "سماعات",
-    description: "سماعات احترافية بتقنية إلغاء ضوضاء وصوت عالي الجودة",
-    price: "1599.00",
-    oldPrice: "1899.00",
-    image: "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=500&q=80",
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
-    ],
-    rating: "4.5",
-    reviewCount: 58,
-    stock: 38,
-    badge: "احترافي",
-    badgeColor: "bg-red-600",
-  },
-  {
-    name: "Samsung Galaxy Watch 6",
-    brand: "Samsung",
-    category: "ساعات ذكية",
-    description: "ساعة ذكية بنظام Wear OS 4 وميزات صحية متقدمة",
-    price: "1199.00",
-    oldPrice: "1399.00",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80",
-      "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=500&q=80",
-    ],
-    rating: "4.4",
-    reviewCount: 62,
-    stock: 40,
-    badge: "ذكية",
-    badgeColor: "bg-blue-600",
-  },
-  {
-    name: "Lenovo ThinkPad X1",
-    brand: "Lenovo",
-    category: "لابتوبات",
-    description: "لابتوب عملي بمعالج Intel Core i7 وبطارية طويلة الأمد",
-    price: "4199.00",
-    oldPrice: "4699.00",
-    image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=500&q=80",
-      "https://images.unsplash.com/photo-1588872657840-790ff3bde08c?w=500&q=80",
-    ],
-    rating: "4.6",
-    reviewCount: 55,
-    stock: 18,
-    badge: "عملي",
-    badgeColor: "bg-gray-600",
-  },
+const categories = [
+  ["هواتف ذكية", "smartphones", "أحدث الهواتف الذكية والإكسسوارات الأساسية"],
+  ["لابتوبات وأجهزة لوحية", "laptops-tablets", "أجهزة للعمل والدراسة والترفيه"],
+  ["سماعات", "headphones", "سماعات لاسلكية ورأسية بجودة صوت عالية"],
+  ["ساعات ذكية", "smartwatches", "ساعات ذكية لمتابعة النشاط والصحة"],
 ];
 
+const brands = [
+  ["Apple", "apple"],
+  ["Samsung", "samsung"],
+  ["Sony", "sony"],
+  ["Google", "google"],
+  ["Dell", "dell"],
+  ["Xiaomi", "xiaomi"],
+];
+
+const products = [
+  { code: "APL-SMART-001", name: "iPhone 15 Pro Max", brand: "Apple", category: "هواتف ذكية", price: "4999.00", oldPrice: "5499.00", stock: 50, rating: "4.90", reviewCount: 128, badge: "الأكثر مبيعاً", rentable: false, image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&q=80", description: "هاتف احترافي بمعالج A17 Pro وكاميرا متقدمة وشاشة Super Retina XDR." },
+  { code: "SAM-SMART-001", name: "Samsung Galaxy S24 Ultra", brand: "Samsung", category: "هواتف ذكية", price: "4299.00", oldPrice: "4799.00", stock: 45, rating: "4.80", reviewCount: 95, badge: "جديد", rentable: false, image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=800&q=80", description: "هاتف رائد بمعالج Snapdragon 8 Gen 3 وقلم S Pen وكاميرا 200 ميجابكسل." },
+  { code: "GOO-SMART-001", name: "Google Pixel 8 Pro", brand: "Google", category: "هواتف ذكية", price: "3799.00", oldPrice: "4199.00", stock: 30, rating: "4.60", reviewCount: 65, badge: "ذكي", rentable: false, image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=800&q=80", description: "هاتف ذكي بتقنيات تصوير ومعالجة مدعومة بالذكاء الاصطناعي." },
+  { code: "APL-LAPT-001", name: "MacBook Pro M3", brand: "Apple", category: "لابتوبات وأجهزة لوحية", price: "7999.00", oldPrice: null, stock: 20, rating: "4.90", reviewCount: 64, badge: "مميز", rentable: true, rentalPrice: "299.00", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&q=80", description: "لابتوب احترافي بمعالج Apple M3 وشاشة Retina وبطارية طويلة الأمد." },
+  { code: "DEL-LAPT-001", name: "Dell XPS 15", brand: "Dell", category: "لابتوبات وأجهزة لوحية", price: "6499.00", oldPrice: null, stock: 15, rating: "4.70", reviewCount: 78, badge: "قوي", rentable: true, rentalPrice: "249.00", image: "https://images.unsplash.com/photo-1588872657840-790ff3bde08c?w=800&q=80", description: "لابتوب عالي الأداء مناسب للأعمال الإبداعية والبرمجة." },
+  { code: "SAM-TABL-001", name: "Samsung Galaxy Tab S9", brand: "Samsung", category: "لابتوبات وأجهزة لوحية", price: "2799.00", oldPrice: "3199.00", stock: 25, rating: "4.60", reviewCount: 53, badge: "خصم", rentable: true, rentalPrice: "119.00", image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&q=80", description: "جهاز لوحي بشاشة AMOLED وقلم S Pen للاستخدام اليومي والمهني." },
+  { code: "SON-AUDI-001", name: "Sony WH-1000XM5", brand: "Sony", category: "سماعات", price: "2299.00", oldPrice: "2699.00", stock: 40, rating: "4.80", reviewCount: 142, badge: "الأفضل", rentable: true, rentalPrice: "79.00", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80", description: "سماعات رأس احترافية بإلغاء ضوضاء متقدم وصوت نقي." },
+  { code: "APL-AUDI-001", name: "AirPods Pro 2", brand: "Apple", category: "سماعات", price: "899.00", oldPrice: "1099.00", stock: 100, rating: "4.70", reviewCount: 210, badge: "خصم 18%", rentable: false, image: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=800&q=80", description: "سماعات لاسلكية بإلغاء ضوضاء نشط وصوت مكاني." },
+  { code: "SAM-WATC-001", name: "Samsung Galaxy Watch 6", brand: "Samsung", category: "ساعات ذكية", price: "1199.00", oldPrice: "1399.00", stock: 40, rating: "4.40", reviewCount: 62, badge: "ذكية", rentable: false, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80", description: "ساعة ذكية لمتابعة الصحة والرياضة مع نظام Wear OS." },
+  { code: "XIA-SMART-001", name: "Xiaomi 13 Ultra", brand: "Xiaomi", category: "هواتف ذكية", price: "2899.00", oldPrice: "3299.00", stock: 28, rating: "4.50", reviewCount: 45, badge: "عرض", rentable: false, image: "https://images.unsplash.com/photo-1511707267537-b85faf00021e?w=800&q=80", description: "هاتف بكاميرا احترافية ومعالج قوي وشحن سريع." },
+];
+
+async function createSchema(connection) {
+  const statements = [
+    `CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, openId VARCHAR(64) NOT NULL UNIQUE, name TEXT, email VARCHAR(320), phone VARCHAR(20), address TEXT, loginMethod VARCHAR(64), token TEXT, role ENUM('user','admin') NOT NULL DEFAULT 'user', createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, lastSignedIn TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    `CREATE TABLE IF NOT EXISTS category (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, slug VARCHAR(255) NOT NULL UNIQUE, description TEXT, image TEXT, isActive BOOLEAN NOT NULL DEFAULT TRUE, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    `CREATE TABLE IF NOT EXISTS brand (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, slug VARCHAR(255) NOT NULL UNIQUE, description TEXT, logo TEXT, isActive BOOLEAN NOT NULL DEFAULT TRUE, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    `CREATE TABLE IF NOT EXISTS products (id INT AUTO_INCREMENT PRIMARY KEY, productCode VARCHAR(64) NOT NULL UNIQUE, name VARCHAR(255) NOT NULL, brand VARCHAR(100) NOT NULL, category VARCHAR(100) NOT NULL, categoryId INT NULL, brandId INT NULL, description TEXT, price DECIMAL(10,2) NOT NULL, oldPrice DECIMAL(10,2) NULL, isRentable BOOLEAN NOT NULL DEFAULT FALSE, rentalPrice DECIMAL(10,2) NULL, image TEXT, images JSON, rating DECIMAL(3,2) DEFAULT 0, reviewCount INT DEFAULT 0, stock INT DEFAULT 0, isOnSale BOOLEAN NOT NULL DEFAULT FALSE, badge VARCHAR(100), badgeColor VARCHAR(50), color VARCHAR(100), size VARCHAR(100), createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX products_categoryId_idx (categoryId), INDEX products_brandId_idx (brandId)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    `CREATE TABLE IF NOT EXISTS cartItems (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, productId INT NOT NULL, quantity INT NOT NULL DEFAULT 1, addedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    `CREATE TABLE IF NOT EXISTS wishlistItems (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, productId INT NOT NULL, addedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    `CREATE TABLE IF NOT EXISTS reviews (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, productId INT NOT NULL, rating INT NOT NULL, title VARCHAR(255) NOT NULL, comment TEXT, helpful INT DEFAULT 0, verified BOOLEAN DEFAULT FALSE, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    `CREATE TABLE IF NOT EXISTS orders (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, totalPrice DECIMAL(10,2) NOT NULL, status ENUM('pending','processing','shipped','delivered','cancelled') DEFAULT 'pending', paymentMethod VARCHAR(100) NOT NULL DEFAULT 'الدفع عند الاستلام', customerName TEXT, customerPhone VARCHAR(20), shippingAddress TEXT, items JSON, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  ];
+  for (const statement of statements) await connection.query(statement);
+}
+
 async function seedDatabase() {
+  const connection = await mysql.createConnection(DATABASE_URL);
   try {
-    const db = drizzle(DATABASE_URL);
+    await connection.beginTransaction();
+    await createSchema(connection);
 
-    console.log("🌱 جاري إدراج البيانات الأولية...");
-
-    for (const product of seedProducts) {
-      await db.insert(products).values({
-        name: product.name,
-        brand: product.brand,
-        category: product.category,
-        description: product.description,
-        price: product.price,
-        oldPrice: product.oldPrice,
-        image: product.image,
-        images: JSON.stringify(product.images),
-        rating: product.rating,
-        reviewCount: product.reviewCount,
-        stock: product.stock,
-        badge: product.badge,
-        badgeColor: product.badgeColor,
-      });
-
-      console.log(`✅ تم إضافة: ${product.name}`);
+    for (const [name, slug, description] of categories) {
+      await connection.execute("INSERT INTO category (name, slug, description) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description)", [name, slug, description]);
+    }
+    for (const [name, slug] of brands) {
+      await connection.execute("INSERT INTO brand (name, slug) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name)", [name, slug]);
     }
 
-    console.log("\n✨ تم إدراج جميع المنتجات بنجاح!");
-    console.log(`📊 عدد المنتجات المضافة: ${seedProducts.length}`);
+    const [categoryRows] = await connection.query("SELECT id, name FROM category");
+    const [brandRows] = await connection.query("SELECT id, name FROM brand");
+    const categoryIds = new Map(categoryRows.map((row) => [row.name, row.id]));
+    const brandIds = new Map(brandRows.map((row) => [row.name, row.id]));
 
-    await connection.end();
+    for (const product of products) {
+      const categoryId = categoryIds.get(product.category);
+      const brandId = brandIds.get(product.brand);
+      await connection.execute(
+        `INSERT INTO products (productCode, name, brand, category, categoryId, brandId, description, price, oldPrice, isRentable, rentalPrice, image, images, rating, reviewCount, stock, isOnSale, badge, badgeColor)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE name = VALUES(name), brand = VALUES(brand), category = VALUES(category), categoryId = VALUES(categoryId), brandId = VALUES(brandId), description = VALUES(description), price = VALUES(price), oldPrice = VALUES(oldPrice), isRentable = VALUES(isRentable), rentalPrice = VALUES(rentalPrice), image = VALUES(image), images = VALUES(images), rating = VALUES(rating), reviewCount = VALUES(reviewCount), stock = VALUES(stock), isOnSale = VALUES(isOnSale), badge = VALUES(badge), badgeColor = VALUES(badgeColor)`,
+        [product.code, product.name, product.brand, product.category, categoryId, brandId, product.description, product.price, product.oldPrice, product.rentable, product.rentalPrice ?? null, product.image, JSON.stringify([product.image]), product.rating, product.reviewCount, product.stock, Boolean(product.oldPrice), product.badge, "bg-blue-600"],
+      );
+    }
+
+    await connection.execute("INSERT INTO users (openId, name, email, phone, address, loginMethod, role) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), email = VALUES(email), role = VALUES(role)", ["demo-admin", "مدير تجريبي", "demo-admin@example.com", "0500000000", "الرياض - حي تجريبي", "seed", "admin"]);
+    await connection.execute("INSERT INTO users (openId, name, email, phone, address, loginMethod, role) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), email = VALUES(email)", ["demo-customer", "عميل تجريبي", "demo-customer@example.com", "0550000000", "جدة - حي تجريبي", "seed", "user"]);
+
+    const [[admin]] = await connection.query("SELECT id FROM users WHERE openId = 'demo-admin'");
+    const [[customer]] = await connection.query("SELECT id FROM users WHERE openId = 'demo-customer'");
+    const [[firstProduct]] = await connection.query("SELECT id, productCode, price, name, image FROM products ORDER BY id LIMIT 1");
+    const [[secondProduct]] = await connection.query("SELECT id, productCode, price, name, image FROM products ORDER BY id LIMIT 1 OFFSET 1");
+
+    await connection.execute("INSERT INTO reviews (userId, productId, rating, title, comment, helpful, verified) SELECT ?, ?, ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM reviews WHERE userId = ? AND productId = ?)", [customer.id, firstProduct.id, 5, "تجربة ممتازة", "المنتج مطابق للوصف والتوصيل كان سريعاً.", 4, true, customer.id, firstProduct.id]);
+    await connection.execute("INSERT INTO cartItems (userId, productId, quantity) SELECT ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM cartItems WHERE userId = ? AND productId = ?)", [customer.id, secondProduct.id, 1, customer.id, secondProduct.id]);
+    await connection.execute("INSERT INTO wishlistItems (userId, productId) SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM wishlistItems WHERE userId = ? AND productId = ?)", [customer.id, firstProduct.id, customer.id, firstProduct.id]);
+    await connection.execute("INSERT INTO orders (userId, totalPrice, status, paymentMethod, customerName, customerPhone, shippingAddress, items) SELECT ?, ?, 'processing', 'الدفع عند الاستلام', ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM orders WHERE userId = ?)", [customer.id, firstProduct.price, "عميل تجريبي", "0550000000", "جدة - حي تجريبي", JSON.stringify([{ productId: firstProduct.id, quantity: 1, price: Number(firstProduct.price), title: firstProduct.name, image: firstProduct.image }]), customer.id]);
+
+    await connection.commit();
+    const [[{ productCount }]] = await connection.query("SELECT COUNT(*) AS productCount FROM products");
+    const [[{ userCount }]] = await connection.query("SELECT COUNT(*) AS userCount FROM users");
+    console.log(`تمت تهيئة قاعدة البيانات بنجاح: ${productCount} منتج، ${userCount} مستخدم تجريبي.`);
   } catch (error) {
-    console.error("❌ خطأ أثناء إدراج البيانات:", error);
-    process.exit(1);
+    await connection.rollback();
+    console.error("فشل تهيئة قاعدة البيانات:", error.message);
+    process.exitCode = 1;
+  } finally {
+    await connection.end();
   }
 }
 
