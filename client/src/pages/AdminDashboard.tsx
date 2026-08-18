@@ -361,35 +361,35 @@ export default function AdminDashboard() {
 
   const createBrandMutation = trpc.dashboard.brands.create.useMutation({
     onSuccess: () => {
-      toast.success("تم إضافة البراند بنجاح");
+      toast.success("تم إضافة القسم بنجاح");
       refetchBrands();
       setBrandFormData({ ...emptyBrandForm });
       setEditingBrand(null);
     },
     onError: err => {
-      toast.error(`فشل إضافة البراند: ${err.message}`);
+      toast.error(`فشل إضافة القسم: ${err.message}`);
     },
   });
 
   const updateBrandMutation = trpc.dashboard.brands.update.useMutation({
     onSuccess: () => {
-      toast.success("تم تحديث البراند بنجاح");
+      toast.success("تم تحديث القسم بنجاح");
       refetchBrands();
       setBrandFormData({ ...emptyBrandForm });
       setEditingBrand(null);
     },
     onError: err => {
-      toast.error(`فشل تحديث البراند: ${err.message}`);
+      toast.error(`فشل تحديث القسم: ${err.message}`);
     },
   });
 
   const deleteBrandMutation = trpc.dashboard.brands.delete.useMutation({
     onSuccess: () => {
-      toast.success("تم حذف البراند بنجاح");
+      toast.success("تم حذف القسم بنجاح");
       refetchBrands();
     },
     onError: () => {
-      toast.error("فشل حذف البراند");
+      toast.error("فشل حذف القسم");
     },
   });
 
@@ -520,7 +520,7 @@ export default function AdminDashboard() {
     }
 
     if (!productFormData.category.trim() || !productFormData.brand.trim()) {
-      toast.error("يرجى اختيار فئة وبراند قبل الحفظ");
+      toast.error("يرجى اختيار قسم قبل الحفظ");
       return;
     }
 
@@ -617,7 +617,7 @@ export default function AdminDashboard() {
 
   function handleBrandSubmit() {
     if (!brandFormData.name.trim()) {
-      toast.error("يرجى إدخال اسم البراند");
+      toast.error("يرجى إدخال اسم القسم");
       return;
     }
 
@@ -876,7 +876,7 @@ export default function AdminDashboard() {
         <Tabs defaultValue="products" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="products">إدارة المنتجات</TabsTrigger>
-            <TabsTrigger value="catalog">الفئات والبراندات</TabsTrigger>
+            <TabsTrigger value="catalog">الأقسام</TabsTrigger>
             <TabsTrigger value="users">إدارة المستخدمين</TabsTrigger>
             <TabsTrigger value="reviews">إدارة التقييمات</TabsTrigger>
           </TabsList>
@@ -930,7 +930,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <label className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700">
-                      <span className="font-semibold">العلامة التجارية:</span>
+                      <span className="font-semibold">الأقسام:</span>
                       <select
                         value={productBrandFilter}
                         onChange={event =>
@@ -938,7 +938,7 @@ export default function AdminDashboard() {
                         }
                         className="bg-transparent font-medium outline-none"
                       >
-                        <option value="">كل العلامات التجارية</option>
+                        <option value="">كل الأقسام</option>
                         {productFilterOptions.brands.map(brand => (
                           <option key={brand} value={brand}>
                             {brand}
@@ -1021,9 +1021,9 @@ export default function AdminDashboard() {
                         <option value="price-desc">
                           السعر: من الأعلى للأقل
                         </option>
-                        <option value="brand-asc">العلامة التجارية: أ-ي</option>
+                        <option value="brand-asc">الأقسام: أ-ي</option>
                         <option value="brand-desc">
-                          العلامة التجارية: ي-أ
+                          الأقسام: ي-أ
                         </option>
                       </select>
                     </label>
@@ -1247,7 +1247,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-purple-600 font-medium">
-                        إجمالي البراندات
+                        إجمالي الأقسام
                       </p>
                       <p className="text-2xl font-bold text-purple-700">
                         {brands?.length || 0}
@@ -1438,14 +1438,14 @@ export default function AdminDashboard() {
 
               <Card className="shadow-md">
                 <CardHeader>
-                  <CardTitle>إدارة البراندات</CardTitle>
+                  <CardTitle>إدارة الأقسام</CardTitle>
                   <CardDescription>
-                    أضف أو عدّل العلامات التجارية للمنتجات
+                    أضف أو عدّل أقسام المنتجات
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="brandName">اسم البراند</Label>
+                    <Label htmlFor="brandName">اسم القسم</Label>
                     <Input
                       id="brandName"
                       value={brandFormData.name}
@@ -1524,7 +1524,7 @@ export default function AdminDashboard() {
                         updateBrandMutation.isPending
                       }
                     >
-                      {editingBrand ? "تحديث البراند" : "إضافة براند"}
+                      {editingBrand ? "تحديث القسم" : "إضافة قسم"}
                     </Button>
                     {editingBrand && (
                       <Button
@@ -1588,7 +1588,7 @@ export default function AdminDashboard() {
                                     onClick={() => {
                                       if (
                                         confirm(
-                                          `هل تريد حذف البراند ${brand.name}?`
+                                          `هل تريد حذف القسم ${brand.name}?`
                                         )
                                       )
                                         deleteBrandMutation.mutate(brand.id);
@@ -1836,7 +1836,7 @@ export default function AdminDashboard() {
 
             <div className="space-y-1">
               <Label htmlFor="productBrand">
-                العلامة التجارية <span className="text-red-500">*</span>
+                الأقسام <span className="text-red-500">*</span>
               </Label>
               <select
                 id="productBrand"
@@ -1856,7 +1856,7 @@ export default function AdminDashboard() {
                 }}
                 className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">اختر البراند...</option>
+                <option value="">اختر القسم...</option>
                 {(brands || []).map((brand: any) => (
                   <option key={brand.id} value={brand.id}>
                     {brand.name}

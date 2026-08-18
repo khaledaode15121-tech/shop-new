@@ -462,8 +462,8 @@ export default function Products() {
                     <option value="newest">الأحدث</option>
                     <option value="price-asc">السعر: من الأقل للأعلى</option>
                     <option value="price-desc">السعر: من الأعلى للأقل</option>
-                    <option value="brand-asc">العلامة التجارية: أ-ي</option>
-                    <option value="brand-desc">العلامة التجارية: ي-أ</option>
+                    <option value="brand-asc">الأقسام: أ-ي</option>
+                    <option value="brand-desc">الأقسام: ي-أ</option>
                   </select>
                 </label>
                 {hasActiveFilters && !isLoading && (
@@ -476,7 +476,7 @@ export default function Products() {
                       : selectedSizes.length > 0
                         ? `${selectedSizes.length} مقاس محدد`
                         : selectedBrands.length > 0
-                          ? `${selectedBrands.length} براند محدد`
+                          ? `${selectedBrands.length} قسم محدد`
                           : "فلاتر مفعّلة"}
                   </span>
                 )}

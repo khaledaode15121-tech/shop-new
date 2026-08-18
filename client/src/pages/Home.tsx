@@ -688,7 +688,7 @@ function CatalogHero({
                       className="text-sm font-medium text-slate-600"
                       style={{ fontFamily: "'Cairo', sans-serif" }}
                     >
-                      العلامة التجارية
+                      الأقسام
                     </span>
                     <span
                       className="rounded-full bg-blue-600 px-3 py-1 text-sm font-bold text-white"
@@ -1308,16 +1308,16 @@ function ProductsSection({
                   className="flex items-center gap-2 rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#555]"
                   style={{ fontFamily: "'Cairo', sans-serif" }}
                 >
-                  <span>العلامة التجارية:</span>
+                  <span>الأقسام:</span>
                   <select
                     value={selectedBrand ?? ""}
                     onChange={event =>
                       setSelectedBrand(event.target.value || undefined)
                     }
                     className="max-w-[170px] bg-transparent font-semibold outline-none"
-                    aria-label="التصفية حسب العلامة التجارية"
+                    aria-label="التصفية حسب الأقسام"
                   >
-                    <option value="">كل العلامات التجارية</option>
+                    <option value="">كل الأقسام</option>
                     {brandOptions.map(brand => (
                       <option key={brand} value={brand}>
                         {brand}
@@ -1405,8 +1405,8 @@ function ProductsSection({
                     <option value="newest">الافتراضي</option>
                     <option value="price-asc">السعر: من الأقل للأعلى</option>
                     <option value="price-desc">السعر: من الأعلى للأقل</option>
-                    <option value="brand-asc">العلامة التجارية: أ-ي</option>
-                    <option value="brand-desc">العلامة التجارية: ي-أ</option>
+                    <option value="brand-asc">الأقسام: أ-ي</option>
+                    <option value="brand-desc">الأقسام: ي-أ</option>
                   </select>
                 </label>
                 <button
