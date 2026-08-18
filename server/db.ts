@@ -493,6 +493,8 @@ export async function createOrderFromCart(
   );
   const totalPriceFormatted = totalPrice.toFixed(2);
 
+  let createdOrderId: number | null = null;
+
   await db.transaction(async tx => {
     for (const item of orderItems) {
       const product = productMap.get(item.productId)!;
@@ -504,10 +506,11 @@ export async function createOrderFromCart(
     }
 
     try {
-      await tx.insert(orders).values({
+      const insertedOrder = await tx.insert(orders).values({
         userId,
         totalPrice: totalPriceFormatted,
         status: "pending",
+        paymentStatus: "unpaid",
         paymentMethod,
         customerName,
         customerPhone,
@@ -522,6 +525,8 @@ export async function createOrderFromCart(
           })
         ),
       });
+      const insertedId = extractInsertId(insertedOrder);
+      createdOrderId = typeof insertedId === "number" ? insertedId : null;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       if (
@@ -540,8 +545,11 @@ export async function createOrderFromCart(
   });
 
   return {
+    orderId: createdOrderId,
     totalPrice,
     items: orderItems,
+    status: "pending" as const,
+    paymentStatus: "unpaid" as const,
   };
 }
 
@@ -614,6 +622,19 @@ export async function updateOrderStatus(
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  const current = await db
+    .select({ status: orders.status })
+    .from(orders)
+    .where(and(eq(orders.id, orderId), eq(orders.userId, userId)))
+    .limit(1);
+  if (current.length === 0) return null;
+  if (status === "delivered" && current[0].status !== "shipped") {
+    throw new Error("لا يمكن تسجيل التسليم قبل خروج الطلب من المستودع");
+  }
+  if (current[0].status === "delivered" && status !== "delivered") {
+    throw new Error("لا يمكن تغيير حالة الطلب بعد التسليم");
+  }
+
   await db
     .update(orders)
     .set({ status })
@@ -655,8 +676,8 @@ export async function updateOrderItems(
   }
 
   const order = existing[0];
-  if (order.status === "delivered") {
-    throw new Error("لا يمكن تعديل الطلب بعد التسليم");
+  if (order.status === "shipped" || order.status === "delivered" || order.status === "cancelled") {
+    throw new Error("لا يمكن تعديل الطلب بعد خروجه من المستودع أو إلغائه");
   }
 
   const totalPrice = items

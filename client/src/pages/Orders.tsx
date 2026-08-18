@@ -8,6 +8,20 @@ import { ArrowLeft, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 
+const orderStatusLabel: Record<string, string> = {
+  pending: "بانتظار المراجعة",
+  processing: "قيد التجهيز في المستودع",
+  shipped: "خرج من المستودع",
+  delivered: "تم التسليم",
+  cancelled: "ملغى",
+};
+
+const paymentStatusLabel: Record<string, string> = {
+  unpaid: "غير مدفوع",
+  paid: "تم الدفع",
+  refunded: "تم رد المبلغ",
+};
+
 export default function Orders() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
@@ -120,7 +134,8 @@ export default function Orders() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (order.status === "delivered") {
+                          if (order.status !== "shipped") {
+                            toast.info("سيظهر زر تأكيد التسليم بعد خروج الطلب من المستودع");
                             return;
                           }
                           updateStatusMutation.mutate({ orderId: order.id, status: "delivered" });
@@ -128,12 +143,18 @@ export default function Orders() {
                         className={`rounded-full px-4 py-2 text-sm font-semibold ${
                           order.status === "delivered"
                             ? "bg-emerald-600 text-white"
+                            : order.status === "shipped"
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
-                        }`}
+                        }}`}
                       >
-                        {order.status === "delivered" ? "تم تسليم الطلب" : "لم يتم تسليم الطلب"}
+                        {order.status === "delivered"
+                          ? "تم تسليم الطلب"
+                          : order.status === "shipped"
+                          ? "تأكيد استلام الطلب"
+                          : orderStatusLabel[order.status || "pending"] || order.status || "pending"}
                       </button>
-                      {order.status !== "delivered" && (
+                      {(order.status === "pending" || order.status === "processing") && (
                         <button
                           type="button"
                           onClick={() => {
@@ -185,6 +206,8 @@ export default function Orders() {
                           تعديل المنتج أو حذف
                         </button>
                       )}
+                      <div className="text-sm text-gray-700">حالة الطلب: <strong>{orderStatusLabel[order.status || "pending"] || order.status || "pending"}</strong></div>
+                      <div className="text-sm text-gray-700">حالة الدفع: <strong>{paymentStatusLabel[order.paymentStatus || "unpaid"] || order.paymentStatus || "غير محددة"}</strong></div>
                       <div className="text-sm text-gray-600">طريقة الدفع: {order.paymentMethod}</div>
                       <div className="text-sm text-gray-600">العنوان: {order.shippingAddress || "غير محدد"}</div>
                       <div className="text-sm text-gray-600">المجموع: {parseFloat(order.totalPrice.toString()).toLocaleString()} ر.س</div>
@@ -250,7 +273,7 @@ export default function Orders() {
                                 </div>
                               </div>
                               <div className="flex flex-col items-end gap-3 sm:items-center sm:flex-row">
-                                {order.status !== "delivered" && (
+                                {(order.status === "pending" || order.status === "processing") && (
                                   <button
                                     type="button"
                                     onClick={() => {

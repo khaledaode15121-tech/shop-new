@@ -154,6 +154,11 @@ export const orders = mysqlTable("orders", {
     "delivered",
     "cancelled",
   ]).default("pending"),
+  paymentStatus: mysqlEnum("paymentStatus", [
+    "unpaid",
+    "paid",
+    "refunded",
+  ]).default("unpaid").notNull(),
   paymentMethod: varchar("paymentMethod", { length: 100 }).notNull(),
   customerName: text("customerName"),
   customerPhone: varchar("customerPhone", { length: 20 }),

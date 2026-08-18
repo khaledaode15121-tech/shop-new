@@ -17,6 +17,34 @@ const PAYMENT_METHODS = [
   "Google Pay",
 ];
 
+type SavedOrder = {
+  orderId: number | null;
+  totalPrice: number;
+  status: string;
+  paymentStatus: string;
+  items: Array<{
+    productId: number;
+    quantity: number;
+    price: number;
+    title?: string | null;
+    image?: string | null;
+  }>;
+};
+
+const orderStatusLabel: Record<string, string> = {
+  pending: "بانتظار المراجعة",
+  processing: "قيد التجهيز في المستودع",
+  shipped: "خرج من المستودع",
+  delivered: "تم التسليم",
+  cancelled: "ملغى",
+};
+
+const paymentStatusLabel: Record<string, string> = {
+  unpaid: "غير مدفوع",
+  paid: "تم الدفع",
+  refunded: "تم رد المبلغ",
+};
+
 export default function ShoppingCart() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
@@ -31,6 +59,7 @@ export default function ShoppingCart() {
   const [paymentMethod, setPaymentMethod] = useState("الدفع عند الاستلام");
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [isFinalized, setIsFinalized] = useState(false);
+  const [savedOrder, setSavedOrder] = useState<SavedOrder | null>(null);
 
   useEffect(() => {
     setUserDetails({
@@ -66,11 +95,12 @@ export default function ShoppingCart() {
   });
 
   const checkoutMutation = trpc.cart.checkout.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       refetch();
+      setSavedOrder(data as SavedOrder);
       setCheckoutSuccess(true);
       setIsFinalized(true);
-      toast.success("تم حفظ الطلب نهائيًا، السلة أصبحت غير قابلة للتعديل");
+      toast.success("تم حفظ الطلب النهائي؛ يمكنك متابعة حالته من صفحة الطلبات");
     },
     onError: (error) => {
       toast.error(error.message || "فشل حفظ الطلب النهائي");
@@ -158,10 +188,28 @@ export default function ShoppingCart() {
               <div>
                 <p className="font-semibold text-lg">تم إكمال الشراء بنجاح</p>
                 <p className="text-sm text-emerald-700">
-                  اضغط زر عرض السلة لمراجعة وتعديل المنتجات أو إضافة جديدة.
+                  تم نقل المنتجات إلى سجل الطلبات حتى لا تضيع بعد إفراغ السلة الحالية.
                 </p>
+                {savedOrder && (
+                  <div className="mt-4 grid gap-2 text-sm text-emerald-900 sm:grid-cols-3">
+                    <span>رقم الطلب: <strong>#{savedOrder.orderId ?? "—"}</strong></span>
+                    <span>الحالة: <strong>{orderStatusLabel[savedOrder.status] || savedOrder.status}</strong></span>
+                    <span>الدفع: <strong>{paymentStatusLabel[savedOrder.paymentStatus] || savedOrder.paymentStatus}</strong></span>
+                  </div>
+                )}
               </div>
-              <div className="flex flex-wrap gap-3">
+              {savedOrder && savedOrder.items.length > 0 && (
+                <div className="mt-5 space-y-2 rounded-2xl border border-emerald-200 bg-white/70 p-4">
+                  <p className="font-semibold">المنتجات المحفوظة في الطلب</p>
+                  {savedOrder.items.map((item) => (
+                    <div key={item.productId} className="flex items-center justify-between gap-3 text-sm">
+                      <span>{item.title || `المنتج #${item.productId}`}</span>
+                      <span>الكمية: {item.quantity} × {item.price.toLocaleString()} ر.س</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="mt-4 flex flex-wrap gap-3">
                 <Button
                   type="button"
                   className="bg-emerald-600 hover:bg-emerald-700 text-white"

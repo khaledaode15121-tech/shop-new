@@ -45,7 +45,7 @@ async function createSchema(connection) {
     `CREATE TABLE IF NOT EXISTS cartItems (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, productId INT NOT NULL, quantity INT NOT NULL DEFAULT 1, addedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     `CREATE TABLE IF NOT EXISTS wishlistItems (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, productId INT NOT NULL, addedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     `CREATE TABLE IF NOT EXISTS reviews (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, productId INT NOT NULL, rating INT NOT NULL, title VARCHAR(255) NOT NULL, comment TEXT, helpful INT DEFAULT 0, verified BOOLEAN DEFAULT FALSE, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-    `CREATE TABLE IF NOT EXISTS orders (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, totalPrice DECIMAL(10,2) NOT NULL, status ENUM('pending','processing','shipped','delivered','cancelled') DEFAULT 'pending', paymentMethod VARCHAR(100) NOT NULL DEFAULT 'الدفع عند الاستلام', customerName TEXT, customerPhone VARCHAR(20), shippingAddress TEXT, items JSON, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    `CREATE TABLE IF NOT EXISTS orders (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, totalPrice DECIMAL(10,2) NOT NULL, status ENUM('pending','processing','shipped','delivered','cancelled') DEFAULT 'pending', paymentStatus ENUM('unpaid','paid','refunded') NOT NULL DEFAULT 'unpaid', paymentMethod VARCHAR(100) NOT NULL DEFAULT 'الدفع عند الاستلام', customerName TEXT, customerPhone VARCHAR(20), shippingAddress TEXT, items JSON, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   ];
   for (const statement of statements) await connection.query(statement);
 }
@@ -78,6 +78,7 @@ async function seedDatabase() {
     await createSchema(connection);
     await ensureColumn(connection, "category", "categoryCode", "VARCHAR(32) NULL");
     await ensureColumn(connection, "brand", "brandCode", "VARCHAR(32) NULL");
+    await ensureColumn(connection, "orders", "paymentStatus", "ENUM('unpaid','paid','refunded') NOT NULL DEFAULT 'unpaid'");
     await connection.query("UPDATE category SET categoryCode = CONCAT('CAT-', LPAD(id, 3, '0')) WHERE categoryCode IS NULL");
     await connection.query("UPDATE brand SET brandCode = CONCAT('SEC-', LPAD(id, 3, '0')) WHERE brandCode IS NULL");
     await createIndexes(connection);
@@ -132,7 +133,7 @@ async function seedDatabase() {
     await connection.execute("INSERT INTO reviews (userId, productId, rating, title, comment, helpful, verified) SELECT ?, ?, ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM reviews WHERE userId = ? AND productId = ?)", [customer.id, firstProduct.id, 5, "تجربة ممتازة", "المنتج مطابق للوصف والتوصيل كان سريعاً.", 4, true, customer.id, firstProduct.id]);
     await connection.execute("INSERT INTO cartItems (userId, productId, quantity) SELECT ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM cartItems WHERE userId = ? AND productId = ?)", [customer.id, secondProduct.id, 1, customer.id, secondProduct.id]);
     await connection.execute("INSERT INTO wishlistItems (userId, productId) SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM wishlistItems WHERE userId = ? AND productId = ?)", [customer.id, firstProduct.id, customer.id, firstProduct.id]);
-    await connection.execute("INSERT INTO orders (userId, totalPrice, status, paymentMethod, customerName, customerPhone, shippingAddress, items) SELECT ?, ?, 'processing', 'الدفع عند الاستلام', ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM orders WHERE userId = ?)", [customer.id, firstProduct.price, "عميل تجريبي", "0550000000", "جدة - حي تجريبي", JSON.stringify([{ productId: firstProduct.id, quantity: 1, price: Number(firstProduct.price), title: firstProduct.name, image: firstProduct.image }]), customer.id]);
+    await connection.execute("INSERT INTO orders (userId, totalPrice, status, paymentStatus, paymentMethod, customerName, customerPhone, shippingAddress, items) SELECT ?, ?, 'processing', 'unpaid', 'الدفع عند الاستلام', ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM orders WHERE userId = ?)", [customer.id, firstProduct.price, "عميل تجريبي", "0550000000", "جدة - حي تجريبي", JSON.stringify([{ productId: firstProduct.id, quantity: 1, price: Number(firstProduct.price), title: firstProduct.name, image: firstProduct.image }]), customer.id]);
 
     await connection.commit();
     const [[{ productCount }]] = await connection.query("SELECT COUNT(*) AS productCount FROM products");
