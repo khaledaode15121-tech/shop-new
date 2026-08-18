@@ -79,6 +79,7 @@ interface ProductFormData {
 
 interface CategoryFormData {
   name: string;
+  categoryCode: string;
   slug: string;
   description: string;
   image: string;
@@ -87,6 +88,7 @@ interface CategoryFormData {
 
 interface BrandFormData {
   name: string;
+  brandCode: string;
   slug: string;
   description: string;
   logo: string;
@@ -123,6 +125,7 @@ const emptyProductForm: ProductFormData = {
 
 const emptyCategoryForm: CategoryFormData = {
   name: "",
+  categoryCode: "",
   slug: "",
   description: "",
   image: "",
@@ -131,6 +134,7 @@ const emptyCategoryForm: CategoryFormData = {
 
 const emptyBrandForm: BrandFormData = {
   name: "",
+  brandCode: "",
   slug: "",
   description: "",
   logo: "",
@@ -519,8 +523,13 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (!productFormData.category.trim() || !productFormData.brand.trim()) {
-      toast.error("يرجى اختيار قسم قبل الحفظ");
+    if (
+      !productFormData.category.trim() ||
+      !productFormData.brand.trim() ||
+      !productFormData.categoryId ||
+      !productFormData.brandId
+    ) {
+      toast.error("يرجى اختيار القسم والفئة قبل الحفظ");
       return;
     }
 
@@ -552,8 +561,8 @@ export default function AdminDashboard() {
         name: productFormData.name,
         brand: productFormData.brand,
         category: productFormData.category,
-        categoryId: productFormData.categoryId ?? undefined,
-        brandId: productFormData.brandId ?? undefined,
+        categoryId: productFormData.categoryId!,
+        brandId: productFormData.brandId!,
         description: productFormData.description || undefined,
         price: productFormData.price,
         oldPrice: productFormData.oldPrice || undefined,
@@ -576,6 +585,7 @@ export default function AdminDashboard() {
     setEditingCategory(category);
     setCategoryFormData({
       name: category.name || "",
+      categoryCode: category.categoryCode || "",
       slug: category.slug || "",
       description: category.description || "",
       image: category.image || "",
@@ -591,6 +601,7 @@ export default function AdminDashboard() {
 
     const payload = {
       name: categoryFormData.name,
+      categoryCode: categoryFormData.categoryCode.trim() || undefined,
       slug: categoryFormData.slug || slugify(categoryFormData.name),
       description: categoryFormData.description || undefined,
       image: categoryFormData.image || undefined,
@@ -608,6 +619,7 @@ export default function AdminDashboard() {
     setEditingBrand(brand);
     setBrandFormData({
       name: brand.name || "",
+      brandCode: brand.brandCode || "",
       slug: brand.slug || "",
       description: brand.description || "",
       logo: brand.logo || "",
@@ -623,6 +635,7 @@ export default function AdminDashboard() {
 
     const payload = {
       name: brandFormData.name,
+      brandCode: brandFormData.brandCode.trim() || undefined,
       slug: brandFormData.slug || slugify(brandFormData.name),
       description: brandFormData.description || undefined,
       logo: brandFormData.logo || undefined,
@@ -1284,6 +1297,21 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="categoryCode">معرف الفئة بالإنجليزية</Label>
+                    <Input
+                      id="categoryCode"
+                      value={categoryFormData.categoryCode}
+                      onChange={e =>
+                        setCategoryFormData(prev => ({
+                          ...prev,
+                          categoryCode: e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ""),
+                        }))
+                      }
+                      placeholder="CAT-PHONE"
+                    />
+                    <p className="text-xs text-gray-500">حروف إنجليزية وأرقام وشرطة فقط. يُستخدم في معرف المنتج.</p>
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="categorySlug">الاسم المختصر</Label>
                     <Input
                       id="categorySlug"
@@ -1390,7 +1418,7 @@ export default function AdminDashboard() {
                           (categories || []).map((category: any) => (
                             <TableRow key={category.id}>
                               <TableCell className="font-mono text-xs text-gray-600">
-                                {category.id}
+                                {category.categoryCode || category.id}
                               </TableCell>
                               <TableCell>{category.name}</TableCell>
                               <TableCell>
@@ -1458,6 +1486,21 @@ export default function AdminDashboard() {
                       }
                       placeholder="مثال: Apple"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="brandCode">معرف القسم بالإنجليزية</Label>
+                    <Input
+                      id="brandCode"
+                      value={brandFormData.brandCode}
+                      onChange={e =>
+                        setBrandFormData(prev => ({
+                          ...prev,
+                          brandCode: e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ""),
+                        }))
+                      }
+                      placeholder="SEC-APPLE"
+                    />
+                    <p className="text-xs text-gray-500">حروف إنجليزية وأرقام وشرطة فقط. يُستخدم في معرف المنتج.</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="brandSlug">الاسم المختصر</Label>
@@ -1543,7 +1586,7 @@ export default function AdminDashboard() {
                       <TableHeader>
                         <TableRow>
                           <TableHead className="text-right">
-                            معرف البرند
+                            معرف القسم
                           </TableHead>
                           <TableHead className="text-right">الاسم</TableHead>
                           <TableHead className="text-right">الحالة</TableHead>
@@ -1566,7 +1609,7 @@ export default function AdminDashboard() {
                           (brands || []).map((brand: any) => (
                             <TableRow key={brand.id}>
                               <TableCell className="font-mono text-xs text-gray-600">
-                                {brand.id}
+                                {brand.brandCode || brand.id}
                               </TableCell>
                               <TableCell>{brand.name}</TableCell>
                               <TableCell>

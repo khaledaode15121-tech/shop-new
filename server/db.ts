@@ -866,6 +866,7 @@ export async function getAllCategories() {
 
 export async function createCategoryAdmin(data: {
   name: string;
+  categoryCode?: string;
   slug?: string;
   description?: string;
   image?: string;
@@ -875,6 +876,7 @@ export async function createCategoryAdmin(data: {
   if (!db) throw new Error("Database not available");
 
   const payload: InsertCategory = {
+    categoryCode: normalizeIdentifier(data.categoryCode, `CAT-${Date.now()}`),
     name: data.name,
     slug:
       data.slug ||
@@ -969,6 +971,7 @@ export async function getAllBrands() {
 
 export async function createBrandAdmin(data: {
   name: string;
+  brandCode?: string;
   slug?: string;
   description?: string;
   logo?: string;
@@ -978,6 +981,7 @@ export async function createBrandAdmin(data: {
   if (!db) throw new Error("Database not available");
 
   const payload: InsertBrand = {
+    brandCode: normalizeIdentifier(data.brandCode, `SEC-${Date.now()}`),
     name: data.name,
     slug:
       data.slug ||
@@ -1160,20 +1164,21 @@ export async function getAllProducts() {
   }
 }
 
-function makeBrandShortCode(brandName: string | null | undefined) {
-  const normalized = String(brandName ?? "BRD")
+function normalizeIdentifier(value: string | null | undefined, fallback: string) {
+  const normalized = String(value ?? "")
     .trim()
-    .replace(/\s+/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
     .toUpperCase();
-  return Array.from(normalized).slice(0, 3).join("") || "BRD";
+  return normalized || fallback;
 }
 
 function buildProductCode(
-  brandName: string | null | undefined,
-  categoryId: number | null | undefined,
+  brandCode: string | null | undefined,
+  categoryCode: string | null | undefined,
   sequence: number
 ) {
-  return `${makeBrandShortCode(brandName)}-${categoryId ?? 0}-${String(sequence).padStart(6, "0")}`;
+  return `${normalizeIdentifier(brandCode, "SEC-000")}-${normalizeIdentifier(categoryCode, "CAT-000")}-${String(sequence).padStart(6, "0")}`;
 }
 
 export async function updateProductAdmin(
@@ -1243,14 +1248,29 @@ export async function updateProductAdmin(
       data.brand !== undefined
     ) {
       const currentProduct = await getProductById(id);
-      const finalBrandName = updateData.brand ?? currentProduct?.brand;
+      const finalBrandId =
+        data.brandId !== undefined ? data.brandId : currentProduct?.brandId;
       const finalCategoryId =
         data.categoryId !== undefined
           ? data.categoryId
           : currentProduct?.categoryId;
+      const [brandRow] = finalBrandId
+        ? await db
+            .select({ brandCode: brandTable.brandCode })
+            .from(brandTable)
+            .where(eq(brandTable.id, finalBrandId))
+            .limit(1)
+        : [];
+      const [categoryRow] = finalCategoryId
+        ? await db
+            .select({ categoryCode: categoryTable.categoryCode })
+            .from(categoryTable)
+            .where(eq(categoryTable.id, finalCategoryId))
+            .limit(1)
+        : [];
       updateData.productCode = buildProductCode(
-        finalBrandName,
-        finalCategoryId,
+        brandRow?.brandCode,
+        categoryRow?.categoryCode,
         id
       );
     }
@@ -1345,25 +1365,37 @@ export async function createProductAdmin(data: {
   }
 
   try {
+    if (!data.categoryId || !data.brandId) {
+      throw new Error("A product must be linked to both a section and a category.");
+    }
+
     let categoryName = data.category;
     let brandName = data.brand;
+    let categoryCode = "CAT-000";
+    let brandCode = "SEC-000";
 
     if (data.categoryId) {
       const categoryRow = await db
-        .select()
+        .select({ name: categoryTable.name, categoryCode: categoryTable.categoryCode })
         .from(categoryTable)
         .where(eq(categoryTable.id, data.categoryId))
         .limit(1);
-      if (categoryRow[0]) categoryName = categoryRow[0].name;
+      if (categoryRow[0]) {
+        categoryName = categoryRow[0].name;
+        categoryCode = categoryRow[0].categoryCode;
+      }
     }
 
     if (data.brandId) {
       const brandRow = await db
-        .select()
+        .select({ name: brandTable.name, brandCode: brandTable.brandCode })
         .from(brandTable)
         .where(eq(brandTable.id, data.brandId))
         .limit(1);
-      if (brandRow[0]) brandName = brandRow[0].name;
+      if (brandRow[0]) {
+        brandName = brandRow[0].name;
+        brandCode = brandRow[0].brandCode;
+      }
     }
 
     const result = await db.insert(products).values({
@@ -1394,7 +1426,7 @@ export async function createProductAdmin(data: {
       await db
         .update(products)
         .set({
-          productCode: buildProductCode(brandName, data.categoryId, insertId),
+          productCode: buildProductCode(brandCode, categoryCode, insertId),
         })
         .where(eq(products.id, insertId));
       const newProduct = await getProductById(insertId);
@@ -1415,8 +1447,8 @@ export async function createProductAdmin(data: {
       .update(products)
       .set({
         productCode: buildProductCode(
-          brandName,
-          data.categoryId,
+          brandCode,
+          categoryCode,
           latestProduct.id
         ),
       })

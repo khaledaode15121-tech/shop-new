@@ -329,8 +329,8 @@ export const appRouter = router({
             name: z.string(),
             brand: z.string(),
             category: z.string(),
-            categoryId: z.number().optional(),
-            brandId: z.number().optional(),
+            categoryId: z.number(),
+            brandId: z.number(),
             description: z.string().optional(),
             price: z.string(),
             oldPrice: z.string().optional(),
@@ -380,6 +380,7 @@ export const appRouter = router({
         .input(
           z.object({
             name: z.string(),
+            categoryCode: z.string().regex(/^[A-Za-z0-9-]+$/).optional(),
             slug: z.string().optional(),
             description: z.string().optional(),
             image: z.string().optional(),
@@ -392,6 +393,7 @@ export const appRouter = router({
           z.object({
             id: z.number(),
             name: z.string().optional(),
+            categoryCode: z.string().regex(/^[A-Za-z0-9-]+$/).optional(),
             slug: z.string().optional(),
             description: z.string().optional(),
             image: z.string().optional(),
@@ -409,6 +411,7 @@ export const appRouter = router({
         .input(
           z.object({
             name: z.string(),
+            brandCode: z.string().regex(/^[A-Za-z0-9-]+$/).optional(),
             slug: z.string().optional(),
             description: z.string().optional(),
             logo: z.string().optional(),
@@ -421,6 +424,7 @@ export const appRouter = router({
           z.object({
             id: z.number(),
             name: z.string().optional(),
+            brandCode: z.string().regex(/^[A-Za-z0-9-]+$/).optional(),
             slug: z.string().optional(),
             description: z.string().optional(),
             logo: z.string().optional(),

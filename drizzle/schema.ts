@@ -41,6 +41,7 @@ export type InsertUser = typeof users.$inferInsert;
 // ─── Category Table ─────────────────────────────────────────────────────────
 export const category = mysqlTable("category", {
   id: int("id").autoincrement().primaryKey(),
+  categoryCode: varchar("categoryCode", { length: 32 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   description: text("description"),
@@ -56,6 +57,7 @@ export type InsertCategory = typeof category.$inferInsert;
 // ─── Brand Table ───────────────────────────────────────────────────────────
 export const brand = mysqlTable("brand", {
   id: int("id").autoincrement().primaryKey(),
+  brandCode: varchar("brandCode", { length: 32 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   description: text("description"),

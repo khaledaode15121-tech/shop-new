@@ -8,19 +8,19 @@ if (!DATABASE_URL) {
 }
 
 const categories = [
-  ["هواتف ذكية", "smartphones", "أحدث الهواتف الذكية والإكسسوارات الأساسية"],
-  ["لابتوبات وأجهزة لوحية", "laptops-tablets", "أجهزة للعمل والدراسة والترفيه"],
-  ["سماعات", "headphones", "سماعات لاسلكية ورأسية بجودة صوت عالية"],
-  ["ساعات ذكية", "smartwatches", "ساعات ذكية لمتابعة النشاط والصحة"],
+  ["هواتف ذكية", "CAT-PHONE", "smartphones", "أحدث الهواتف الذكية والإكسسوارات الأساسية"],
+  ["لابتوبات وأجهزة لوحية", "CAT-COMPUTE", "laptops-tablets", "أجهزة للعمل والدراسة والترفيه"],
+  ["سماعات", "CAT-AUDIO", "headphones", "سماعات لاسلكية ورأسية بجودة صوت عالية"],
+  ["ساعات ذكية", "CAT-WATCH", "smartwatches", "ساعات ذكية لمتابعة النشاط والصحة"],
 ];
 
 const brands = [
-  ["Apple", "apple"],
-  ["Samsung", "samsung"],
-  ["Sony", "sony"],
-  ["Google", "google"],
-  ["Dell", "dell"],
-  ["Xiaomi", "xiaomi"],
+  ["Apple", "SEC-APPLE", "apple"],
+  ["Samsung", "SEC-SAMSUNG", "samsung"],
+  ["Sony", "SEC-SONY", "sony"],
+  ["Google", "SEC-GOOGLE", "google"],
+  ["Dell", "SEC-DELL", "dell"],
+  ["Xiaomi", "SEC-XIAOMI", "xiaomi"],
 ];
 
 const products = [
@@ -39,8 +39,8 @@ const products = [
 async function createSchema(connection) {
   const statements = [
     `CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, openId VARCHAR(64) NOT NULL UNIQUE, name TEXT, email VARCHAR(320), phone VARCHAR(20), address TEXT, loginMethod VARCHAR(64), token TEXT, role ENUM('user','admin') NOT NULL DEFAULT 'user', createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, lastSignedIn TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-    `CREATE TABLE IF NOT EXISTS category (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, slug VARCHAR(255) NOT NULL UNIQUE, description TEXT, image TEXT, isActive BOOLEAN NOT NULL DEFAULT TRUE, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-    `CREATE TABLE IF NOT EXISTS brand (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, slug VARCHAR(255) NOT NULL UNIQUE, description TEXT, logo TEXT, isActive BOOLEAN NOT NULL DEFAULT TRUE, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    `CREATE TABLE IF NOT EXISTS category (id INT AUTO_INCREMENT PRIMARY KEY, categoryCode VARCHAR(32) NOT NULL UNIQUE, name VARCHAR(255) NOT NULL, slug VARCHAR(255) NOT NULL UNIQUE, description TEXT, image TEXT, isActive BOOLEAN NOT NULL DEFAULT TRUE, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    `CREATE TABLE IF NOT EXISTS brand (id INT AUTO_INCREMENT PRIMARY KEY, brandCode VARCHAR(32) NOT NULL UNIQUE, name VARCHAR(255) NOT NULL, slug VARCHAR(255) NOT NULL UNIQUE, description TEXT, logo TEXT, isActive BOOLEAN NOT NULL DEFAULT TRUE, createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     `CREATE TABLE IF NOT EXISTS products (id INT AUTO_INCREMENT PRIMARY KEY, productCode VARCHAR(64) NOT NULL UNIQUE, name VARCHAR(255) NOT NULL, brand VARCHAR(100) NOT NULL, category VARCHAR(100) NOT NULL, categoryId INT NULL, brandId INT NULL, description TEXT, price DECIMAL(10,2) NOT NULL, oldPrice DECIMAL(10,2) NULL, isRentable BOOLEAN NOT NULL DEFAULT FALSE, rentalPrice DECIMAL(10,2) NULL, image TEXT, images JSON, rating DECIMAL(3,2) DEFAULT 0, reviewCount INT DEFAULT 0, stock INT DEFAULT 0, isOnSale BOOLEAN NOT NULL DEFAULT FALSE, badge VARCHAR(100), badgeColor VARCHAR(50), color VARCHAR(100), size VARCHAR(100), createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX products_categoryId_idx (categoryId), INDEX products_brandId_idx (brandId)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     `CREATE TABLE IF NOT EXISTS cartItems (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, productId INT NOT NULL, quantity INT NOT NULL DEFAULT 1, addedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
     `CREATE TABLE IF NOT EXISTS wishlistItems (id INT AUTO_INCREMENT PRIMARY KEY, userId INT NOT NULL, productId INT NOT NULL, addedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
@@ -50,33 +50,75 @@ async function createSchema(connection) {
   for (const statement of statements) await connection.query(statement);
 }
 
+async function ensureColumn(connection, table, column, definition) {
+  try {
+    await connection.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${definition}`);
+  } catch (error) {
+    if (error.code !== "ER_DUP_FIELDNAME") throw error;
+  }
+}
+
+async function createIndexes(connection) {
+  for (const statement of [
+    "ALTER TABLE `category` ADD UNIQUE KEY `category_categoryCode_unique` (`categoryCode`)",
+    "ALTER TABLE `brand` ADD UNIQUE KEY `brand_brandCode_unique` (`brandCode`)",
+  ]) {
+    try {
+      await connection.query(statement);
+    } catch (error) {
+      if (error.code !== "ER_DUP_KEYNAME" && error.code !== "ER_DUP_ENTRY") throw error;
+    }
+  }
+}
+
 async function seedDatabase() {
   const connection = await mysql.createConnection(DATABASE_URL);
   try {
     await connection.beginTransaction();
     await createSchema(connection);
+    await ensureColumn(connection, "category", "categoryCode", "VARCHAR(32) NULL");
+    await ensureColumn(connection, "brand", "brandCode", "VARCHAR(32) NULL");
+    await connection.query("UPDATE category SET categoryCode = CONCAT('CAT-', LPAD(id, 3, '0')) WHERE categoryCode IS NULL");
+    await connection.query("UPDATE brand SET brandCode = CONCAT('SEC-', LPAD(id, 3, '0')) WHERE brandCode IS NULL");
+    await createIndexes(connection);
 
-    for (const [name, slug, description] of categories) {
-      await connection.execute("INSERT INTO category (name, slug, description) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description)", [name, slug, description]);
+    for (const [name, categoryCode, slug, description] of categories) {
+      await connection.execute("INSERT INTO category (categoryCode, name, slug, description) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE categoryCode = VALUES(categoryCode), name = VALUES(name), description = VALUES(description)", [categoryCode, name, slug, description]);
     }
-    for (const [name, slug] of brands) {
-      await connection.execute("INSERT INTO brand (name, slug) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name)", [name, slug]);
+    for (const [name, brandCode, slug] of brands) {
+      await connection.execute("INSERT INTO brand (brandCode, name, slug) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE brandCode = VALUES(brandCode), name = VALUES(name)", [brandCode, name, slug]);
     }
 
-    const [categoryRows] = await connection.query("SELECT id, name FROM category");
-    const [brandRows] = await connection.query("SELECT id, name FROM brand");
+    const [categoryRows] = await connection.query("SELECT id, name, categoryCode FROM category");
+    const [brandRows] = await connection.query("SELECT id, name, brandCode FROM brand");
     const categoryIds = new Map(categoryRows.map((row) => [row.name, row.id]));
+    const categoryCodes = new Map(categoryRows.map((row) => [row.name, row.categoryCode]));
     const brandIds = new Map(brandRows.map((row) => [row.name, row.id]));
+    const brandCodes = new Map(brandRows.map((row) => [row.name, row.brandCode]));
 
     for (const product of products) {
       const categoryId = categoryIds.get(product.category);
+      const categoryCode = categoryCodes.get(product.category) || "CAT-000";
       const brandId = brandIds.get(product.brand);
-      await connection.execute(
-        `INSERT INTO products (productCode, name, brand, category, categoryId, brandId, description, price, oldPrice, isRentable, rentalPrice, image, images, rating, reviewCount, stock, isOnSale, badge, badgeColor)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE name = VALUES(name), brand = VALUES(brand), category = VALUES(category), categoryId = VALUES(categoryId), brandId = VALUES(brandId), description = VALUES(description), price = VALUES(price), oldPrice = VALUES(oldPrice), isRentable = VALUES(isRentable), rentalPrice = VALUES(rentalPrice), image = VALUES(image), images = VALUES(images), rating = VALUES(rating), reviewCount = VALUES(reviewCount), stock = VALUES(stock), isOnSale = VALUES(isOnSale), badge = VALUES(badge), badgeColor = VALUES(badgeColor)`,
-        [product.code, product.name, product.brand, product.category, categoryId, brandId, product.description, product.price, product.oldPrice, product.rentable, product.rentalPrice ?? null, product.image, JSON.stringify([product.image]), product.rating, product.reviewCount, product.stock, Boolean(product.oldPrice), product.badge, "bg-blue-600"],
-      );
+      const brandCode = brandCodes.get(product.brand) || "SEC-000";
+      const values = [product.name, product.brand, product.category, categoryId, brandId, product.description, product.price, product.oldPrice, product.rentable, product.rentalPrice ?? null, product.image, JSON.stringify([product.image]), product.rating, product.reviewCount, product.stock, Boolean(product.oldPrice), product.badge, "bg-blue-600"];
+      const [[existingProduct]] = await connection.query("SELECT id FROM products WHERE name = ? LIMIT 1", [product.name]);
+      let productId = existingProduct?.id;
+      if (productId) {
+        await connection.execute(
+          `UPDATE products SET brand = ?, category = ?, categoryId = ?, brandId = ?, description = ?, price = ?, oldPrice = ?, isRentable = ?, rentalPrice = ?, image = ?, images = ?, rating = ?, reviewCount = ?, stock = ?, isOnSale = ?, badge = ?, badgeColor = ? WHERE id = ?`,
+          [...values.slice(1), productId],
+        );
+      } else {
+        const [result] = await connection.execute(
+          `INSERT INTO products (productCode, name, brand, category, categoryId, brandId, description, price, oldPrice, isRentable, rentalPrice, image, images, rating, reviewCount, stock, isOnSale, badge, badgeColor)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [`SEED-${product.code}`, ...values],
+        );
+        productId = result.insertId;
+      }
+      const generatedCode = `${brandCode}-${categoryCode}-${String(productId).padStart(6, "0")}`;
+      await connection.execute("UPDATE products SET productCode = ? WHERE id = ?", [generatedCode, productId]);
     }
 
     await connection.execute("INSERT INTO users (openId, name, email, phone, address, loginMethod, role) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), email = VALUES(email), role = VALUES(role)", ["demo-admin", "مدير تجريبي", "demo-admin@example.com", "0500000000", "الرياض - حي تجريبي", "seed", "admin"]);
