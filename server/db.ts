@@ -17,6 +17,8 @@ import {
   Order,
   orders,
   InsertOrder,
+  rentalRequests,
+  rentalBookings,
   category as categoryTable,
   brand as brandTable,
 } from "../drizzle/schema";
@@ -742,6 +744,178 @@ export async function updateOrderItems(
 }
 
 // ─── Wishlist Functions ───────────────────────────────────────────────────────
+export type RentalRequestStatus = (typeof rentalRequests.$inferSelect)["status"];
+export type RentalBookingStatus = (typeof rentalBookings.$inferSelect)["status"];
+
+async function getRentalRequestWithProduct(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select({
+      id: rentalRequests.id,
+      userId: rentalRequests.userId,
+      productId: rentalRequests.productId,
+      rentalDate: rentalRequests.rentalDate,
+      status: rentalRequests.status,
+      createdAt: rentalRequests.createdAt,
+      updatedAt: rentalRequests.updatedAt,
+      productName: products.name,
+      productImage: products.image,
+      rentalPrice: products.rentalPrice,
+    })
+    .from(rentalRequests)
+    .leftJoin(products, eq(rentalRequests.productId, products.id))
+    .where(eq(rentalRequests.id, id))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function createRentalRequest(userId: number, productId: number, rentalDate: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(rentalDate)) throw new Error("تاريخ الإيجار غير صالح");
+  if (rentalDate < new Date().toISOString().slice(0, 10)) throw new Error("لا يمكن اختيار تاريخ سابق");
+
+  const product = await getProductById(productId);
+  if (!product || !product.isRentable) throw new Error("هذا المنتج غير متاح للإيجار");
+  const existingBooking = await db
+    .select({ id: rentalBookings.id })
+    .from(rentalBookings)
+    .where(and(eq(rentalBookings.productId, productId), eq(rentalBookings.rentalDate, rentalDate), eq(rentalBookings.status, "booked")))
+    .limit(1);
+
+  const inserted = await db.insert(rentalRequests).values({
+    userId,
+    productId,
+    rentalDate,
+    status: existingBooking.length > 0 ? "unavailable" : "pending",
+  });
+  const requestId = extractInsertId(inserted);
+  const request = requestId ? await getRentalRequestWithProduct(requestId) : null;
+  return {
+    request,
+    available: existingBooking.length === 0,
+    message: existingBooking.length === 0 ? "الطلب قيد المعالجة" : "الطلب غير ممكن للإيجار في هذا التاريخ",
+  };
+}
+
+export async function getRentalRequestsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: rentalRequests.id,
+      userId: rentalRequests.userId,
+      productId: rentalRequests.productId,
+      rentalDate: rentalRequests.rentalDate,
+      status: rentalRequests.status,
+      createdAt: rentalRequests.createdAt,
+      updatedAt: rentalRequests.updatedAt,
+      productName: products.name,
+      productImage: products.image,
+      rentalPrice: products.rentalPrice,
+    })
+    .from(rentalRequests)
+    .leftJoin(products, eq(rentalRequests.productId, products.id))
+    .where(eq(rentalRequests.userId, userId))
+    .orderBy(desc(rentalRequests.createdAt));
+}
+
+export async function getAllRentalRequestsAdmin() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: rentalRequests.id,
+      userId: rentalRequests.userId,
+      productId: rentalRequests.productId,
+      rentalDate: rentalRequests.rentalDate,
+      status: rentalRequests.status,
+      createdAt: rentalRequests.createdAt,
+      updatedAt: rentalRequests.updatedAt,
+      productName: products.name,
+      productImage: products.image,
+      rentalPrice: products.rentalPrice,
+      customerName: users.name,
+      customerPhone: users.phone,
+      customerEmail: users.email,
+    })
+    .from(rentalRequests)
+    .leftJoin(products, eq(rentalRequests.productId, products.id))
+    .leftJoin(users, eq(rentalRequests.userId, users.id))
+    .orderBy(desc(rentalRequests.createdAt));
+}
+
+export async function approveRentalRequest(requestId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.transaction(async tx => {
+    const requestRows = await tx.select().from(rentalRequests).where(eq(rentalRequests.id, requestId)).limit(1);
+    const request = requestRows[0];
+    if (!request) throw new Error("طلب الإيجار غير موجود");
+    if (request.status !== "pending") throw new Error("لا يمكن اعتماد هذا الطلب في حالته الحالية");
+    const productRows = await tx.select({ isRentable: products.isRentable }).from(products).where(eq(products.id, request.productId)).limit(1);
+    if (!productRows[0]?.isRentable) throw new Error("المنتج غير قابل للإيجار");
+    const conflict = await tx.select({ id: rentalBookings.id }).from(rentalBookings).where(and(eq(rentalBookings.productId, request.productId), eq(rentalBookings.rentalDate, request.rentalDate), eq(rentalBookings.status, "booked"))).limit(1);
+    if (conflict.length > 0) {
+      await tx.update(rentalRequests).set({ status: "unavailable" }).where(eq(rentalRequests.id, requestId));
+      throw new Error("تم حجز المنتج في هذا التاريخ من طلب آخر");
+    }
+    await tx.insert(rentalBookings).values({
+      productId: request.productId,
+      rentalDate: request.rentalDate,
+      status: "booked",
+      rentalRequestId: request.id,
+      userId: request.userId,
+    });
+    await tx.update(rentalRequests).set({ status: "approved" }).where(eq(rentalRequests.id, requestId));
+  });
+  return getRentalRequestWithProduct(requestId);
+}
+
+export async function rejectRentalRequest(requestId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(rentalRequests).set({ status: "unavailable" }).where(and(eq(rentalRequests.id, requestId), eq(rentalRequests.status, "pending")));
+  return getRentalRequestWithProduct(requestId);
+}
+
+export async function getAllRentalBookingsAdmin() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: rentalBookings.id,
+      productId: rentalBookings.productId,
+      rentalDate: rentalBookings.rentalDate,
+      status: rentalBookings.status,
+      rentalRequestId: rentalBookings.rentalRequestId,
+      userId: rentalBookings.userId,
+      createdAt: rentalBookings.createdAt,
+      productName: products.name,
+      productImage: products.image,
+      customerName: users.name,
+      customerPhone: users.phone,
+    })
+    .from(rentalBookings)
+    .leftJoin(products, eq(rentalBookings.productId, products.id))
+    .leftJoin(users, eq(rentalBookings.userId, users.id))
+    .orderBy(desc(rentalBookings.rentalDate));
+}
+
+export async function returnRentalBooking(bookingId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.transaction(async tx => {
+    const bookingRows = await tx.select().from(rentalBookings).where(eq(rentalBookings.id, bookingId)).limit(1);
+    const booking = bookingRows[0];
+    if (!booking) throw new Error("الحجز غير موجود");
+    await tx.delete(rentalBookings).where(eq(rentalBookings.id, bookingId));
+    await tx.update(rentalRequests).set({ status: "returned" }).where(eq(rentalRequests.id, booking.rentalRequestId));
+    return booking;
+  });
+}
+
 export async function getWishlistItems(userId: number) {
   const db = await getDb();
   if (!db) return [];

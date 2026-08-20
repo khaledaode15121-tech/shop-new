@@ -24,6 +24,8 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [rentalDate, setRentalDate] = useState("");
+  const [rentalMessage, setRentalMessage] = useState<string | null>(null);
 
   const productId = id ? parseInt(id) : 0;
 
@@ -62,6 +64,18 @@ export default function ProductDetails() {
       } else {
         toast.error("فشل إضافة المنتج إلى السلة");
       }
+    },
+  });
+
+  const rentalRequestMutation = trpc.rentals.request.useMutation({
+    onSuccess: (result) => {
+      setRentalMessage(result.message);
+      toast.success(result.message);
+      void utils.rentals.myRequests.invalidate();
+    },
+    onError: (error) => {
+      setRentalMessage(error.message || "تعذر إرسال طلب الإيجار");
+      toast.error(error.message || "تعذر إرسال طلب الإيجار");
     },
   });
 
@@ -248,6 +262,42 @@ export default function ProductDetails() {
                     {Number(product.rentalPrice).toLocaleString("ar-SA")} ر.س
                   </strong>
                 </span>
+              </div>
+            )}
+
+            {product.isRentable && (
+              <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                <h3 className="mb-2 font-bold text-blue-900">طلب استئجار المنتج</h3>
+                <p className="mb-3 text-sm text-blue-700">حدد تاريخ الاستئجار ثم اضغط تأكيد الطلب. سيظهر الطلب قيد المعالجة حتى تتم مراجعته.</p>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <input
+                    type="date"
+                    min={new Date().toISOString().slice(0, 10)}
+                    value={rentalDate}
+                    onChange={(event) => setRentalDate(event.target.value)}
+                    className="h-11 rounded-xl border border-blue-200 bg-white px-3 text-sm"
+                    aria-label="تاريخ طلب الإيجار"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (!user) {
+                        window.location.href = getLoginUrl();
+                        return;
+                      }
+                      if (!rentalDate) {
+                        toast.error("يرجى تحديد تاريخ الإيجار");
+                        return;
+                      }
+                      rentalRequestMutation.mutate({ productId, rentalDate });
+                    }}
+                    disabled={rentalRequestMutation.isPending}
+                    className="bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    {rentalRequestMutation.isPending ? "جارٍ التحقق..." : "تأكيد طلب الإيجار"}
+                  </Button>
+                </div>
+                {rentalMessage && <p className="mt-3 text-sm font-semibold text-blue-900">{rentalMessage}</p>}
               </div>
             )}
 

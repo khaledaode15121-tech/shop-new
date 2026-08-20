@@ -248,6 +248,18 @@ export const appRouter = router({
       }),
   }),
 
+  rentals: router({
+    request: publicProcedure
+      .input(z.object({ productId: z.number(), rentalDate: z.string() }))
+      .mutation(({ ctx, input }) => {
+        if (!ctx.user) throw new Error("Authentication required");
+        return db.createRentalRequest(ctx.user.id, input.productId, input.rentalDate);
+      }),
+    myRequests: publicProcedure.query(({ ctx }) => {
+      if (!ctx.user) throw new Error("Authentication required");
+      return db.getRentalRequestsByUser(ctx.user.id);
+    }),
+  }),
   wishlist: router({
     list: publicProcedure.query(({ ctx }) => {
       if (!ctx.user) throw new Error("Authentication required");
@@ -332,6 +344,17 @@ export const appRouter = router({
         .mutation(({ input }) =>
           db.updateOrderStatusAdmin(input.orderId, input.status, input.estimatedDeliveryMinutes)
         ),
+    }),
+    rentals: router({
+      requests: router({
+        list: publicProcedure.query(() => db.getAllRentalRequestsAdmin()),
+        approve: publicProcedure.input(z.number()).mutation(({ input }) => db.approveRentalRequest(input)),
+        reject: publicProcedure.input(z.number()).mutation(({ input }) => db.rejectRentalRequest(input)),
+      }),
+      bookings: router({
+        list: publicProcedure.query(() => db.getAllRentalBookingsAdmin()),
+        return: publicProcedure.input(z.number()).mutation(({ input }) => db.returnRentalBooking(input)),
+      }),
     }),
     products: router({
       list: publicProcedure.query(() => db.getAllProducts()),

@@ -16,6 +16,14 @@ const orderStatusLabel: Record<string, string> = {
   cancelled: "ملغى",
 };
 
+const rentalStatusLabel: Record<string, string> = {
+  pending: "قيد المعالجة",
+  unavailable: "غير ممكن للإيجار",
+  approved: "تم الحجز",
+  returned: "تم إرجاع المنتج",
+  cancelled: "ملغى",
+};
+
 const paymentStatusLabel: Record<string, string> = {
   unpaid: "غير مدفوع",
   paid: "تم الدفع",
@@ -27,6 +35,9 @@ export default function Orders() {
   const [, navigate] = useLocation();
 
   const { data: orders = [], isLoading, refetch } = trpc.cart.orders.useQuery(undefined, {
+    enabled: !!user,
+  });
+  const { data: rentalRequests = [], isLoading: rentalRequestsLoading } = trpc.rentals.myRequests.useQuery(undefined, {
     enabled: !!user,
   });
 
@@ -105,6 +116,34 @@ export default function Orders() {
             العودة إلى السلة
           </Button>
         </div>
+
+        <Card className="mb-8 border-blue-100 shadow-sm">
+          <CardHeader>
+            <CardTitle>طلبات الإيجار</CardTitle>
+            <CardDescription>تابع حالة طلبات استئجار المنتجات والتواريخ المحددة.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {rentalRequestsLoading ? (
+              <p className="text-sm text-gray-500">جارٍ تحميل طلبات الإيجار...</p>
+            ) : rentalRequests.length === 0 ? (
+              <p className="text-sm text-gray-500">لا توجد طلبات إيجار حتى الآن.</p>
+            ) : (
+              <div className="space-y-3">
+                {rentalRequests.map((request) => (
+                  <div key={request.id} className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="font-semibold text-gray-900">{request.productName || `المنتج #${request.productId}`}</p>
+                      <p className="text-sm text-gray-600">تاريخ الإيجار: {request.rentalDate}</p>
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-sm font-semibold ${request.status === "approved" ? "bg-emerald-100 text-emerald-700" : request.status === "unavailable" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
+                      {rentalStatusLabel[request.status] || request.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {isLoading ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">

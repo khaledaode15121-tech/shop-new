@@ -7,6 +7,7 @@ import {
   varchar,
   decimal,
   boolean,
+  date,
   json,
 } from "drizzle-orm/mysql-core";
 
@@ -113,6 +114,34 @@ export const cartItems = mysqlTable("cartItems", {
 
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = typeof cartItems.$inferInsert;
+
+// ─── Rental Requests & Bookings ───────────────────────────────────────────────
+export const rentalRequests = mysqlTable("rentalRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  productId: int("productId").notNull(),
+  rentalDate: date("rentalDate", { mode: "string" }).notNull(),
+  status: mysqlEnum("status", ["pending", "unavailable", "approved", "cancelled", "returned"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RentalRequest = typeof rentalRequests.$inferSelect;
+export type InsertRentalRequest = typeof rentalRequests.$inferInsert;
+
+export const rentalBookings = mysqlTable("rentalBookings", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  rentalDate: date("rentalDate", { mode: "string" }).notNull(),
+  status: mysqlEnum("status", ["booked", "available"]).default("booked").notNull(),
+  rentalRequestId: int("rentalRequestId").notNull(),
+  userId: int("userId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RentalBooking = typeof rentalBookings.$inferSelect;
+export type InsertRentalBooking = typeof rentalBookings.$inferInsert;
 
 // ─── Wishlist Table ───────────────────────────────────────────────────────────
 export const wishlistItems = mysqlTable("wishlistItems", {
