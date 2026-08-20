@@ -5,6 +5,7 @@ import { sdk } from "./_core/sdk";
 import { publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
+import { sendRentalWhatsAppNotification } from "./twilio";
 import {
   buildLocalAuthenticatedUser,
   resolveLocalLoginProfile,
@@ -251,9 +252,16 @@ export const appRouter = router({
   rentals: router({
     request: publicProcedure
       .input(z.object({ productId: z.number(), rentalDate: z.string() }))
-      .mutation(({ ctx, input }) => {
+      .mutation(async ({ ctx, input }) => {
         if (!ctx.user) throw new Error("Authentication required");
-        return db.createRentalRequest(ctx.user.id, input.productId, input.rentalDate);
+        const result = await db.createRentalRequest(ctx.user.id, input.productId, input.rentalDate);
+        void sendRentalWhatsAppNotification({
+          phone: ctx.user.phone,
+          event: result.available ? "requested" : "unavailable",
+          productName: result.request?.productName,
+          rentalDate: input.rentalDate,
+        }).catch((error) => console.warn("[Twilio] Rental request notification failed", error));
+        return result;
       }),
     myRequests: publicProcedure.query(({ ctx }) => {
       if (!ctx.user) throw new Error("Authentication required");
@@ -348,12 +356,47 @@ export const appRouter = router({
     rentals: router({
       requests: router({
         list: publicProcedure.query(() => db.getAllRentalRequestsAdmin()),
-        approve: publicProcedure.input(z.number()).mutation(({ input }) => db.approveRentalRequest(input)),
-        reject: publicProcedure.input(z.number()).mutation(({ input }) => db.rejectRentalRequest(input)),
+        approve: publicProcedure.input(z.number()).mutation(async ({ input }) => {
+          const result = await db.approveRentalRequest(input);
+          if (result) {
+            const user = await db.getUserById(result.userId);
+            void sendRentalWhatsAppNotification({
+              phone: user?.phone,
+              event: "approved",
+              productName: result.productName,
+              rentalDate: result.rentalDate,
+            }).catch((error) => console.warn("[Twilio] Rental approval notification failed", error));
+          }
+          return result;
+        }),
+        reject: publicProcedure.input(z.number()).mutation(async ({ input }) => {
+          const result = await db.rejectRentalRequest(input);
+          if (result) {
+            const user = await db.getUserById(result.userId);
+            void sendRentalWhatsAppNotification({
+              phone: user?.phone,
+              event: "unavailable",
+              productName: result.productName,
+              rentalDate: result.rentalDate,
+            }).catch((error) => console.warn("[Twilio] Rental rejection notification failed", error));
+          }
+          return result;
+        }),
       }),
       bookings: router({
         list: publicProcedure.query(() => db.getAllRentalBookingsAdmin()),
-        return: publicProcedure.input(z.number()).mutation(({ input }) => db.returnRentalBooking(input)),
+        return: publicProcedure.input(z.number()).mutation(async ({ input }) => {
+          const booking = await db.returnRentalBooking(input);
+          const user = await db.getUserById(booking.userId);
+          const product = await db.getProductById(booking.productId);
+          void sendRentalWhatsAppNotification({
+            phone: user?.phone,
+            event: "returned",
+            productName: product?.name,
+            rentalDate: booking.rentalDate,
+          }).catch((error) => console.warn("[Twilio] Rental return notification failed", error));
+          return booking;
+        }),
       }),
     }),
     products: router({
