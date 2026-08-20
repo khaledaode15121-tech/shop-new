@@ -32,6 +32,13 @@ export default function AdminRentalSection() {
     },
     onError: (error) => toast.error(error.message || "تعذر رفض الطلب"),
   });
+  const paymentsMutation = trpc.dashboard.rentals.bookings.updatePayments.useMutation({
+    onSuccess: () => {
+      toast.success("تم تحديث الدفعات وحساب الباقي");
+      void utils.dashboard.rentals.bookings.list.invalidate();
+    },
+    onError: error => toast.error(error.message || "تعذر تحديث الدفعات"),
+  });
   const returnMutation = trpc.dashboard.rentals.bookings.return.useMutation({
     onSuccess: () => {
       toast.success("تم إرجاع المنتج وحذف الحجز");
@@ -84,6 +91,7 @@ export default function AdminRentalSection() {
                 <p className="font-semibold text-gray-900">{booking.productName || `المنتج #${booking.productId}`}</p>
                 <p className="text-sm text-gray-600">تاريخ الحجز: {booking.rentalDate}</p>
                 <p className="text-sm text-gray-600">العميل: {booking.customerName || "غير محدد"} — {booking.customerPhone || "بدون هاتف"}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm"><span>سعر الإيجار: <strong>{Number(booking.rentalPrice || 0).toLocaleString()} ر.س</strong></span><span>الباقي: <strong className="text-red-600">{Number(booking.remaining || 0).toLocaleString()} ر.س</strong></span><label className="flex items-center gap-2">الدفعات:<input type="number" min="0" step="0.01" defaultValue={booking.payments || "0"} onBlur={event => paymentsMutation.mutate({ bookingId: booking.id, payments: event.target.value })} className="w-24 rounded border px-2 py-1" /></label></div>
               </div>
               <Button onClick={() => returnMutation.mutate(booking.id)} disabled={returnMutation.isPending} className="bg-slate-700 text-white hover:bg-slate-800">تم إرجاع المنتج — إتاحة للحجز</Button>
             </div>

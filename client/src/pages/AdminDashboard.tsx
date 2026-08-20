@@ -76,6 +76,8 @@ interface ProductFormData {
   color: string;
   size: string;
   isRentable: boolean;
+  isSellable: boolean;
+  purchasePrice: string;
   rentalPrice: string;
 }
 
@@ -122,6 +124,8 @@ const emptyProductForm: ProductFormData = {
   color: "",
   size: "",
   isRentable: false,
+  isSellable: true,
+  purchasePrice: "",
   rentalPrice: "",
 };
 
@@ -192,6 +196,7 @@ export default function AdminDashboard() {
   const [productColorFilter, setProductColorFilter] = useState("");
   const [productSizeFilter, setProductSizeFilter] = useState("");
   const [productCategoryFilter, setProductCategoryFilter] = useState("");
+  const [productRentalFilter, setProductRentalFilter] = useState<"" | "rentable" | "not-rentable">("");
   const [productSort, setProductSort] = useState<
     "default" | "price-asc" | "price-desc" | "brand-asc" | "brand-desc"
   >("default");
@@ -262,7 +267,8 @@ export default function AdminDashboard() {
         (!productBrandFilter || product.brand === productBrandFilter) &&
         (!productColorFilter || product.color === productColorFilter) &&
         (!productSizeFilter || product.size === productSizeFilter) &&
-        (!productCategoryFilter || product.category === productCategoryFilter)
+        (!productCategoryFilter || product.category === productCategoryFilter) &&
+        (!productRentalFilter || (productRentalFilter === "rentable" ? Boolean(product.isRentable) : !Boolean(product.isRentable)))
       );
     });
 
@@ -287,6 +293,7 @@ export default function AdminDashboard() {
     productColorFilter,
     productSizeFilter,
     productCategoryFilter,
+    productRentalFilter,
     productSort,
   ]);
 
@@ -296,6 +303,7 @@ export default function AdminDashboard() {
     setProductColorFilter("");
     setProductSizeFilter("");
     setProductCategoryFilter("");
+    setProductRentalFilter("");
     setProductSort("default");
   };
 
@@ -466,6 +474,8 @@ export default function AdminDashboard() {
       color: product.color || "",
       size: product.size || "",
       isRentable: Boolean(product.isRentable),
+      isSellable: product.isSellable !== false,
+      purchasePrice: product.purchasePrice ? String(product.purchasePrice) : "",
       rentalPrice: product.rentalPrice ? String(product.rentalPrice) : "",
     });
     setIsProductDialogOpen(true);
@@ -554,6 +564,8 @@ export default function AdminDashboard() {
         color: productFormData.color || undefined,
         size: productFormData.size || undefined,
         isRentable: productFormData.isRentable,
+        isSellable: productFormData.isSellable,
+        purchasePrice: productFormData.isSellable ? productFormData.purchasePrice || undefined : undefined,
         rentalPrice: productFormData.isRentable
           ? productFormData.rentalPrice || undefined
           : undefined,
@@ -576,6 +588,8 @@ export default function AdminDashboard() {
         color: productFormData.color || undefined,
         size: productFormData.size || undefined,
         isRentable: productFormData.isRentable,
+        isSellable: productFormData.isSellable,
+        purchasePrice: productFormData.isSellable ? productFormData.purchasePrice || undefined : undefined,
         rentalPrice: productFormData.isRentable
           ? productFormData.rentalPrice || undefined
           : undefined,
@@ -1010,8 +1024,17 @@ export default function AdminDashboard() {
                     {productFilterOptions.categories.length > 0 && (
                       <label className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700">
                         <span className="font-semibold">الفئة:</span>
-                        <select
-                          value={productCategoryFilter}
+                      <select
+                        value={productRentalFilter}
+                        onChange={e => setProductRentalFilter(e.target.value as "" | "rentable" | "not-rentable")}
+                        className="rounded-md border border-gray-200 px-3 py-2 text-sm"
+                      >
+                        <option value="">كل حالات الإيجار</option>
+                        <option value="rentable">القابلة للإيجار</option>
+                        <option value="not-rentable">غير القابلة للإيجار</option>
+                      </select>
+                      <select
+                        value={productCategoryFilter}
                           onChange={event =>
                             setProductCategoryFilter(event.target.value)
                           }
@@ -1874,7 +1897,7 @@ export default function AdminDashboard() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 mt-2">
+          <div className="flex flex-col space-y-4 mt-2">
             <div className="space-y-1">
               <Label htmlFor="productName">
                 اسم المنتج <span className="text-red-500">*</span>
@@ -1995,17 +2018,25 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="rounded-xl border-2 border-emerald-100 bg-emerald-50/60 p-4">
+            <div className="order-first rounded-xl border-2 border-emerald-100 bg-emerald-50/60 p-4">
               <div className="mb-3">
-                <Label className="text-base font-bold text-emerald-900">
-                  إعدادات الإيجار
+                  <Label className="text-base font-bold text-emerald-900">
+                  إعدادات البيع والإيجار
                 </Label>
                 <p className="mt-1 text-xs text-emerald-700">
                   اختر نعم لإظهار المنتج ضمن فلتر المنتجات القابلة للإيجار في
                   المتجر.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="productIsSellable">هل المنتج قابل للبيع؟</Label>
+                  <select id="productIsSellable" value={productFormData.isSellable ? "yes" : "no"} onChange={e => { const isSellable = e.target.value === "yes"; handleProductFormChange("isSellable", isSellable); if (!isSellable) handleProductFormChange("purchasePrice", ""); }} className="w-full rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm">
+                    <option value="yes">نعم</option>
+                    <option value="no">لا</option>
+                  </select>
+                </div>
+                {productFormData.isSellable && <div className="space-y-1"><Label htmlFor="productPurchasePrice">سعر الشراء (ر.س)</Label><Input id="productPurchasePrice" type="number" min="0" step="0.01" value={productFormData.purchasePrice} onChange={e => handleProductFormChange("purchasePrice", e.target.value)} /></div>}
                 <div className="space-y-1">
                   <Label htmlFor="productIsRentable">
                     هل المنتج قابل للإيجار؟

@@ -84,6 +84,8 @@ export const products = mysqlTable("products", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   oldPrice: decimal("oldPrice", { precision: 10, scale: 2 }),
   isRentable: boolean("isRentable").default(false).notNull(),
+  isSellable: boolean("isSellable").default(true).notNull(),
+  purchasePrice: decimal("purchasePrice", { precision: 10, scale: 2 }),
   rentalPrice: decimal("rentalPrice", { precision: 10, scale: 2 }),
   image: text("image"), // URL to image
   images: json("images").$type<string[]>(), // Array of image URLs
@@ -107,7 +109,8 @@ export const cartItems = mysqlTable("cartItems", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   productId: int("productId").notNull(),
-  quantity: int("quantity").notNull().default(1),
+  quantity: int("quantity").notNull(),
+  rentalDate: date("rentalDate", { mode: "string" }),
   addedAt: timestamp("addedAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -134,6 +137,10 @@ export const rentalBookings = mysqlTable("rentalBookings", {
   productId: int("productId").notNull(),
   rentalDate: date("rentalDate", { mode: "string" }).notNull(),
   status: mysqlEnum("status", ["booked", "available"]).default("booked").notNull(),
+  quantity: int("quantity").default(1).notNull(),
+  rentalPrice: decimal("rentalPrice", { precision: 10, scale: 2 }).default("0").notNull(),
+  payments: decimal("payments", { precision: 10, scale: 2 }).default("0").notNull(),
+  remaining: decimal("remaining", { precision: 10, scale: 2 }).default("0").notNull(),
   rentalRequestId: int("rentalRequestId").notNull(),
   userId: int("userId").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

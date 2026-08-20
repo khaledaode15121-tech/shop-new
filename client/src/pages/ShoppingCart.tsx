@@ -81,6 +81,14 @@ export default function ShoppingCart() {
     },
   });
 
+  const setRentalDateMutation = trpc.cart.setRentalDate.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success("تم حفظ تاريخ الإيجار");
+    },
+    onError: error => toast.error(error.message || "تاريخ الإيجار غير صالح"),
+  });
+
   const updateQuantityMutation = trpc.cart.updateQuantity.useMutation({
     onSuccess: () => {
       refetch();
@@ -329,6 +337,19 @@ export default function ShoppingCart() {
                     <p className="text-gray-600 text-sm mb-3">
                       السعر لكل وحدة: {item.productPrice ? parseFloat(item.productPrice.toString()).toLocaleString() : "-"} ر.س
                     </p>
+                    {item.isRentable && (
+                      <div className="mb-3 max-w-xs space-y-1">
+                        <Label htmlFor={`rental-date-${item.id}`}>تاريخ طلب الإيجار</Label>
+                        <Input
+                          id={`rental-date-${item.id}`}
+                          type="date"
+                          min={new Date().toISOString().slice(0, 10)}
+                          value={item.rentalDate || ""}
+                          disabled={isFinalized}
+                          onChange={event => setRentalDateMutation.mutate({ productId: item.productId, rentalDate: event.target.value || null })}
+                        />
+                      </div>
+                    )}
 
                     {/* Quantity Controls */}
                     <div className="flex items-center gap-2 w-fit">

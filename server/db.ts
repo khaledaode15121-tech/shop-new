@@ -362,10 +362,13 @@ export async function getCartItems(userId: number) {
       id: cartItems.id,
       productId: cartItems.productId,
       quantity: cartItems.quantity,
+      rentalDate: cartItems.rentalDate,
       productName: products.name,
       productImage: products.image,
       productPrice: products.price,
       productStock: products.stock,
+      isRentable: products.isRentable,
+      rentalPrice: products.rentalPrice,
     })
     .from(cartItems)
     .leftJoin(products, eq(cartItems.productId, products.id))
@@ -400,6 +403,15 @@ export async function addToCart(
     // Insert new cart item
     return db.insert(cartItems).values({ userId, productId, quantity });
   }
+}
+
+export async function setCartItemRentalDate(userId: number, productId: number, rentalDate: string | null) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (rentalDate && (!/^\d{4}-\d{2}-\d{2}$/.test(rentalDate) || rentalDate < new Date().toISOString().slice(0, 10))) {
+    throw new Error("تاريخ الإيجار غير صالح أو سابق");
+  }
+  return db.update(cartItems).set({ rentalDate }).where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
 }
 
 export async function removeFromCart(userId: number, productId: number) {
@@ -494,6 +506,12 @@ export async function createOrderFromCart(
     0
   );
   const totalPriceFormatted = totalPrice.toFixed(2);
+  const rentalItems = cart.filter(item => Boolean(item.isRentable));
+  for (const item of rentalItems) {
+    if (!item.rentalDate) throw new Error(`يرجى تحديد تاريخ الإيجار للمنتج ${item.productName || item.productId}`);
+    const conflict = await db.select({ id: rentalBookings.id }).from(rentalBookings).where(and(eq(rentalBookings.productId, item.productId), eq(rentalBookings.rentalDate, item.rentalDate), eq(rentalBookings.status, "booked"))).limit(1);
+    if (conflict.length > 0) throw new Error(`المنتج ${item.productName || item.productId} غير متاح للإيجار في تاريخ ${item.rentalDate}`);
+  }
 
   let createdOrderId: number | null = null;
 
@@ -543,6 +561,14 @@ export async function createOrderFromCart(
       throw err;
     }
 
+    for (const item of rentalItems) {
+      const product = productMap.get(item.productId)!;
+      const rentalTotal = (Number(product.rentalPrice || 0) * item.quantity).toFixed(2);
+      const requestInsert = await tx.insert(rentalRequests).values({ userId, productId: item.productId, rentalDate: item.rentalDate!, status: "approved" });
+      const requestId = extractInsertId(requestInsert);
+      if (!requestId) throw new Error("تعذر إنشاء طلب الإيجار");
+      await tx.insert(rentalBookings).values({ productId: item.productId, rentalDate: item.rentalDate!, status: "booked", quantity: item.quantity, rentalPrice: rentalTotal, payments: "0.00", remaining: rentalTotal, rentalRequestId: requestId, userId });
+    }
     await tx.delete(cartItems).where(eq(cartItems.userId, userId));
   });
 
@@ -880,6 +906,19 @@ export async function rejectRentalRequest(requestId: number) {
   return getRentalRequestWithProduct(requestId);
 }
 
+export async function updateRentalBookingPayments(bookingId: number, payments: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const bookingRows = await db.select().from(rentalBookings).where(eq(rentalBookings.id, bookingId)).limit(1);
+  const booking = bookingRows[0];
+  if (!booking) throw new Error("الحجز غير موجود");
+  const paid = Math.max(0, Number(payments) || 0);
+  const total = Number(booking.rentalPrice) || 0;
+  const remaining = Math.max(0, total - paid);
+  await db.update(rentalBookings).set({ payments: paid.toFixed(2), remaining: remaining.toFixed(2) }).where(eq(rentalBookings.id, bookingId));
+  return db.select().from(rentalBookings).where(eq(rentalBookings.id, bookingId)).limit(1).then(rows => rows[0] ?? null);
+}
+
 export async function getAllRentalBookingsAdmin() {
   const db = await getDb();
   if (!db) return [];
@@ -889,6 +928,10 @@ export async function getAllRentalBookingsAdmin() {
       productId: rentalBookings.productId,
       rentalDate: rentalBookings.rentalDate,
       status: rentalBookings.status,
+      quantity: rentalBookings.quantity,
+      rentalPrice: rentalBookings.rentalPrice,
+      payments: rentalBookings.payments,
+      remaining: rentalBookings.remaining,
       rentalRequestId: rentalBookings.rentalRequestId,
       userId: rentalBookings.userId,
       createdAt: rentalBookings.createdAt,
@@ -1433,12 +1476,12 @@ export async function updateProductAdmin(
     if (data.size !== undefined) updateData.size = data.size || null;
     if (data.isRentable !== undefined) {
       updateData.isRentable = data.isRentable;
-      updateData.rentalPrice = data.isRentable
-        ? data.rentalPrice || null
-        : null;
+      updateData.rentalPrice = data.isRentable ? data.rentalPrice || null : null;
     } else if (data.rentalPrice !== undefined) {
       updateData.rentalPrice = data.rentalPrice || null;
     }
+    if (data.isSellable !== undefined) updateData.isSellable = data.isSellable;
+    if (data.purchasePrice !== undefined) updateData.purchasePrice = data.isSellable === false ? null : data.purchasePrice || null;
     if (data.categoryId !== undefined) {
       updateData.categoryId = data.categoryId ?? null;
       if (data.categoryId) {
@@ -1576,6 +1619,8 @@ export async function createProductAdmin(data: {
   size?: string;
   isRentable?: boolean;
   rentalPrice?: string;
+  isSellable?: boolean;
+  purchasePrice?: string;
 }) {
   const db = await getDb();
   if (!db) {
@@ -1635,6 +1680,8 @@ export async function createProductAdmin(data: {
       color: data.color || null,
       size: data.size || null,
       isRentable: data.isRentable ?? false,
+      isSellable: data.isSellable ?? true,
+      purchasePrice: data.isSellable ? data.purchasePrice || null : null,
       rentalPrice: data.isRentable ? data.rentalPrice || null : null,
       productCode: `TEMP-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       rating: "0",

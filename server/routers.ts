@@ -168,6 +168,12 @@ export const appRouter = router({
       if (!ctx.user) throw new Error("Authentication required");
       return db.removeFromCart(ctx.user.id, input);
     }),
+    setRentalDate: publicProcedure
+      .input(z.object({ productId: z.number(), rentalDate: z.string().nullable() }))
+      .mutation(({ ctx, input }) => {
+        if (!ctx.user) throw new Error("Authentication required");
+        return db.setCartItemRentalDate(ctx.user.id, input.productId, input.rentalDate);
+      }),
     updateQuantity: publicProcedure
       .input(z.object({ productId: z.number(), quantity: z.number() }))
       .mutation(({ ctx, input }) => {
@@ -385,6 +391,7 @@ export const appRouter = router({
       }),
       bookings: router({
         list: publicProcedure.query(() => db.getAllRentalBookingsAdmin()),
+        updatePayments: publicProcedure.input(z.object({ bookingId: z.number(), payments: z.string() })).mutation(({ input }) => db.updateRentalBookingPayments(input.bookingId, input.payments)),
         return: publicProcedure.input(z.number()).mutation(async ({ input }) => {
           const booking = await db.returnRentalBooking(input);
           const user = await db.getUserById(booking.userId);
@@ -420,6 +427,8 @@ export const appRouter = router({
             color: z.string().optional(),
             size: z.string().optional(),
             isRentable: z.boolean().optional(),
+            isSellable: z.boolean().optional(),
+            purchasePrice: z.string().optional(),
             rentalPrice: z.string().optional(),
           })
         )
@@ -444,6 +453,8 @@ export const appRouter = router({
             color: z.string().optional(),
             size: z.string().optional(),
             isRentable: z.boolean().optional(),
+            isSellable: z.boolean().optional(),
+            purchasePrice: z.string().optional(),
             rentalPrice: z.string().optional(),
           })
         )
