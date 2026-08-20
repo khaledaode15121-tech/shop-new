@@ -163,6 +163,7 @@ export const orders = mysqlTable("orders", {
   customerName: text("customerName"),
   customerPhone: varchar("customerPhone", { length: 20 }),
   shippingAddress: text("shippingAddress"),
+  estimatedDeliveryMinutes: int("estimatedDeliveryMinutes"),
   items: json("items").$type<
     Array<{
       productId: number;

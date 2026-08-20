@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import AdminOrdersSection from "@/components/AdminOrdersSection";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -887,13 +888,17 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="products" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 gap-1 sm:grid-cols-5">
+            <TabsTrigger value="orders">مراجعة الطلبات</TabsTrigger>
             <TabsTrigger value="products">إدارة المنتجات</TabsTrigger>
             <TabsTrigger value="catalog">الأقسام</TabsTrigger>
             <TabsTrigger value="users">إدارة المستخدمين</TabsTrigger>
             <TabsTrigger value="reviews">إدارة التقييمات</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="orders">
+            <AdminOrdersSection />
+          </TabsContent>
           <TabsContent value="products">
             <Card className="shadow-md">
               <CardHeader>

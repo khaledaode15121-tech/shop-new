@@ -207,6 +207,7 @@ export default function Orders() {
                         </button>
                       )}
                       <div className="text-sm text-gray-700">حالة الطلب: <strong>{orderStatusLabel[order.status || "pending"] || order.status || "pending"}</strong></div>
+                      <div className="text-sm text-gray-700">مدة الانتظار: <strong>{order.estimatedDeliveryMinutes == null ? "غير محددة" : `${order.estimatedDeliveryMinutes} دقيقة`}</strong></div>
                       <div className="text-sm text-gray-700">حالة الدفع: <strong>{paymentStatusLabel[order.paymentStatus || "unpaid"] || order.paymentStatus || "غير محددة"}</strong></div>
                       <div className="text-sm text-gray-600">طريقة الدفع: {order.paymentMethod}</div>
                       <div className="text-sm text-gray-600">العنوان: {order.shippingAddress || "غير محدد"}</div>

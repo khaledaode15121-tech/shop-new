@@ -555,6 +555,31 @@ export async function createOrderFromCart(
 
 export type OrderStatus = (typeof orders.$inferSelect)["status"];
 
+export async function getAllOrdersAdmin() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(orders).orderBy(desc(orders.createdAt));
+}
+
+export async function updateOrderStatusAdmin(
+  orderId: number,
+  status: OrderStatus,
+  estimatedDeliveryMinutes?: number | null
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+  if (existing.length === 0) throw new Error("الطلب غير موجود");
+
+  const updateData: { status: OrderStatus; estimatedDeliveryMinutes?: number | null } = { status };
+  if (estimatedDeliveryMinutes !== undefined) {
+    updateData.estimatedDeliveryMinutes = estimatedDeliveryMinutes;
+  }
+  await db.update(orders).set(updateData).where(eq(orders.id, orderId));
+  const updated = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+  return updated[0] ?? null;
+}
+
 export async function getOrdersByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];

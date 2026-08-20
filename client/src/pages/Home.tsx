@@ -70,6 +70,7 @@ import {
   Youtube,
   LogOut,
   User,
+  History,
   ChevronDown,
   Search,
   Grid2X2,
@@ -319,6 +320,13 @@ function Navbar({
                       السلة
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      onSelect={() => navigate("/orders")}
+                      className="text-right"
+                    >
+                      <History className="w-4 h-4 ml-2" />
+                      الطلبات السابقة
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                       onSelect={handleLogout}
                       className="text-right text-destructive"
                     >
@@ -412,6 +420,18 @@ function Navbar({
                   >
                     <ShoppingCart className="w-4 h-4 ml-2" />
                     السلة
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      navigate("/orders");
+                      setMenuOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full text-sm font-medium rounded-lg border-blue-200 text-blue-700 hover:bg-blue-50"
+                    style={{ fontFamily: "'Cairo', sans-serif" }}
+                  >
+                    <History className="w-4 h-4 ml-1" />
+                    الطلبات السابقة
                   </Button>
                   <Button
                     onClick={() => {
@@ -1023,6 +1043,7 @@ function ProductsSection({
   onCategoryChange: (value: string | undefined) => void;
 }) {
   const [, navigate] = useLocation();
+  const utils = trpc.useContext();
   const { user } = useAuth();
   const normalizedSearchQuery = searchQuery.trim();
   const searchResult = trpc.products.search.useQuery({
@@ -1123,6 +1144,7 @@ function ProductsSection({
 
   const addToCartMutation = trpc.cart.add.useMutation({
     onSuccess: () => {
+      void utils.cart.list.invalidate();
       toast.success("تم إضافة المنتج إلى السلة");
     },
     onError: () => {

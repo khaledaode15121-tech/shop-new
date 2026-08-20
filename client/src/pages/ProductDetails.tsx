@@ -20,6 +20,7 @@ export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [, navigate] = useLocation();
+  const utils = trpc.useContext();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -45,6 +46,7 @@ export default function ProductDetails() {
   // Mutations
   const addToCartMutation = trpc.cart.add.useMutation({
     onSuccess: () => {
+      void utils.cart.list.invalidate();
       toast.success("تم إضافة المنتج إلى السلة بنجاح ✓");
     },
     onError: (error: any) => {

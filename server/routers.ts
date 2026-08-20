@@ -321,6 +321,18 @@ export const appRouter = router({
 
   dashboard: router({
     stats: publicProcedure.query(() => db.getDashboardStats()),
+    orders: router({
+      list: publicProcedure.query(() => db.getAllOrdersAdmin()),
+      updateStatus: publicProcedure
+        .input(z.object({
+          orderId: z.number(),
+          status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled"]),
+          estimatedDeliveryMinutes: z.number().int().min(0).nullable().optional(),
+        }))
+        .mutation(({ input }) =>
+          db.updateOrderStatusAdmin(input.orderId, input.status, input.estimatedDeliveryMinutes)
+        ),
+    }),
     products: router({
       list: publicProcedure.query(() => db.getAllProducts()),
       create: publicProcedure
