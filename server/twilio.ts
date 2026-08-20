@@ -6,7 +6,11 @@ type RentalNotificationInput = {
   phone?: string | null;
   event: RentalNotificationEvent;
   productName?: string | null;
+  productImage?: string | null;
   rentalDate: string;
+  rentalPrice?: string | number | null;
+  payments?: string | number | null;
+  remaining?: string | number | null;
 };
 
 const eventLabels: Record<RentalNotificationEvent, string> = {
@@ -29,6 +33,10 @@ function buildBody(input: RentalNotificationInput) {
     `تحديث طلب الإيجار: ${eventLabels[input.event]}`,
     `المنتج: ${product}`,
     `تاريخ الإيجار: ${input.rentalDate}`,
+    `قيمة الإيجار: ${Number(input.rentalPrice || 0).toLocaleString()} ر.س`,
+    `الدفعات: ${Number(input.payments || 0).toLocaleString()} ر.س`,
+    `الباقي: ${Number(input.remaining || 0).toLocaleString()} ر.س`,
+    "شكرًا لاختياركم متجر أبو علي للاتصالات.",
   ].join("\n");
 }
 
@@ -52,9 +60,14 @@ export async function sendRentalWhatsAppNotification(input: RentalNotificationIn
       "1": eventLabels[input.event],
       "2": input.productName || "المنتج",
       "3": input.rentalDate,
+      "4": String(input.rentalPrice || 0),
+      "5": String(input.payments || 0),
+      "6": String(input.remaining || 0),
+      "7": input.productImage || "",
     }));
   } else {
     body.set("Body", buildBody(input));
+    if (input.productImage) body.set("MediaUrl", input.productImage);
   }
 
   const credentials = Buffer.from(`${twilioAccountSid}:${twilioAuthToken}`).toString("base64");

@@ -60,6 +60,7 @@ export default function ShoppingCart() {
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [isFinalized, setIsFinalized] = useState(false);
   const [savedOrder, setSavedOrder] = useState<SavedOrder | null>(null);
+  const [showCustomerDetails, setShowCustomerDetails] = useState(false);
 
   useEffect(() => {
     setUserDetails({
@@ -183,9 +184,12 @@ export default function ShoppingCart() {
             <h1 className="text-3xl font-black text-gray-900 mt-4" style={{ fontFamily: "'Cairo', sans-serif" }}>
               سلة التسوق
             </h1>
-            <p className="text-gray-600 mt-2">
-              مرحباً، {user.name || "عميل"} — يمكنك تعديل بيانات التسليم هنا.
-            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <p className="text-gray-600">مرحباً، {user.name || "عميل"}</p>
+              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowCustomerDetails(prev => !prev)}>
+                {showCustomerDetails ? "إخفاء بيانات العميل" : `تعديل بيانات ${user.name || "العميل"}`}
+              </Button>
+            </div>
           </div>
           <span className="text-gray-600 text-sm">عدد المنتجات: {cartItems.length}</span>
         </div>
@@ -242,7 +246,7 @@ export default function ShoppingCart() {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
+        {showCustomerDetails && <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
               <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "'Cairo', sans-serif" }}>
@@ -300,7 +304,7 @@ export default function ShoppingCart() {
               />
             </div>
           </form>
-        </div>
+        </div>}
 
         {cartItems.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">

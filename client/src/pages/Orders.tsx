@@ -19,7 +19,7 @@ const orderStatusLabel: Record<string, string> = {
 const rentalStatusLabel: Record<string, string> = {
   pending: "قيد المعالجة",
   unavailable: "غير ممكن للإيجار",
-  approved: "تم الحجز",
+  approved: "تم تأكيد الطلب",
   returned: "تم إرجاع المنتج",
   cancelled: "ملغى",
 };

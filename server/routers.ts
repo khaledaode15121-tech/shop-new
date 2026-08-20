@@ -362,15 +362,19 @@ export const appRouter = router({
     rentals: router({
       requests: router({
         list: publicProcedure.query(() => db.getAllRentalRequestsAdmin()),
-        approve: publicProcedure.input(z.number()).mutation(async ({ input }) => {
-          const result = await db.approveRentalRequest(input);
-          if (result) {
+        approve: publicProcedure.input(z.object({ requestId: z.number(), payments: z.string(), notifyWhatsApp: z.boolean().default(false) })).mutation(async ({ input }) => {
+          const result = await db.approveRentalRequest(input.requestId, input.payments);
+          if (result && input.notifyWhatsApp) {
             const user = await db.getUserById(result.userId);
             void sendRentalWhatsAppNotification({
               phone: user?.phone,
               event: "approved",
               productName: result.productName,
+              productImage: result.productImage,
               rentalDate: result.rentalDate,
+              rentalPrice: result.booking?.rentalPrice,
+              payments: result.booking?.payments,
+              remaining: result.booking?.remaining,
             }).catch((error) => console.warn("[Twilio] Rental approval notification failed", error));
           }
           return result;

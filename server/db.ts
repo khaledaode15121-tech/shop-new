@@ -564,10 +564,10 @@ export async function createOrderFromCart(
     for (const item of rentalItems) {
       const product = productMap.get(item.productId)!;
       const rentalTotal = (Number(product.rentalPrice || 0) * item.quantity).toFixed(2);
-      const requestInsert = await tx.insert(rentalRequests).values({ userId, productId: item.productId, rentalDate: item.rentalDate!, status: "approved" });
+      const requestInsert = await tx.insert(rentalRequests).values({ userId, productId: item.productId, rentalDate: item.rentalDate!, status: "pending" });
       const requestId = extractInsertId(requestInsert);
       if (!requestId) throw new Error("تعذر إنشاء طلب الإيجار");
-      await tx.insert(rentalBookings).values({ productId: item.productId, rentalDate: item.rentalDate!, status: "booked", quantity: item.quantity, rentalPrice: rentalTotal, payments: "0.00", remaining: rentalTotal, rentalRequestId: requestId, userId });
+      await tx.insert(rentalBookings).values({ productId: item.productId, rentalDate: item.rentalDate!, status: "available", quantity: item.quantity, rentalPrice: rentalTotal, payments: "0.00", remaining: rentalTotal, rentalRequestId: requestId, userId });
     }
     await tx.delete(cartItems).where(eq(cartItems.userId, userId));
   });
@@ -872,7 +872,7 @@ export async function getAllRentalRequestsAdmin() {
     .orderBy(desc(rentalRequests.createdAt));
 }
 
-export async function approveRentalRequest(requestId: number) {
+export async function approveRentalRequest(requestId: number, payments: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.transaction(async tx => {
@@ -887,16 +887,18 @@ export async function approveRentalRequest(requestId: number) {
       await tx.update(rentalRequests).set({ status: "unavailable" }).where(eq(rentalRequests.id, requestId));
       throw new Error("تم حجز المنتج في هذا التاريخ من طلب آخر");
     }
-    await tx.insert(rentalBookings).values({
-      productId: request.productId,
-      rentalDate: request.rentalDate,
-      status: "booked",
-      rentalRequestId: request.id,
-      userId: request.userId,
-    });
+    const bookingRows = await tx.select().from(rentalBookings).where(eq(rentalBookings.rentalRequestId, request.id)).limit(1);
+    const booking = bookingRows[0];
+    const rentalTotal = Number(booking?.rentalPrice || 0);
+    const paid = Math.max(0, Number(payments) || 0);
+    if (!booking) throw new Error("سجل الحجز غير موجود");
+    if (paid > rentalTotal) throw new Error("الدفعة لا يمكن أن تتجاوز قيمة الإيجار");
+    await tx.update(rentalBookings).set({ status: "booked", payments: paid.toFixed(2), remaining: Math.max(0, rentalTotal - paid).toFixed(2) }).where(eq(rentalBookings.id, booking.id));
     await tx.update(rentalRequests).set({ status: "approved" }).where(eq(rentalRequests.id, requestId));
   });
-  return getRentalRequestWithProduct(requestId);
+  const approved = await getRentalRequestWithProduct(requestId);
+  const bookingRows = await db.select().from(rentalBookings).where(eq(rentalBookings.rentalRequestId, requestId)).limit(1);
+  return approved ? { ...approved, booking: bookingRows[0] ?? null } : null;
 }
 
 export async function rejectRentalRequest(requestId: number) {
